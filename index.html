@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CareGuard — Bedsore Prevention System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+/* ─── DESIGN SYSTEM ─────────────────────────────────────── */
+:root {
+  --bg:       #0a0d12;
+  --surface:  #111620;
+  --card:     #161d2a;
+  --border:   #1e2a3a;
+  --border2:  #243347;
+  --text:     #c8d8f0;
+  --muted:    #5a7090;
+  --accent:   #00c8ff;
+  --accent2:  #0077ff;
+
+  --low:      #22c55e;
+  --moderate: #facc15;
+  --high:     #f97316;
+  --critical: #ef4444;
+
+  --low-bg:      rgba(34,197,94,.12);
+  --moderate-bg: rgba(250,204,21,.12);
+  --high-bg:     rgba(249,115,22,.12);
+  --critical-bg: rgba(239,68,68,.12);
+
+  --font-display: 'Syne', sans-serif;
+  --font-mono:    'DM Mono', monospace;
+
+  --radius: 12px;
+  --radius-sm: 7px;
+  --shadow: 0 4px 24px rgba(0,0,0,.5);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ─── LAYOUT ─────────────────────────────────────────────── */
+.shell {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  grid-template-rows: 56px 1fr;
+  height: 100vh;
+}
+
+/* ─── TOPBAR ─────────────────────────────────────────────── */
+.topbar {
+  grid-column: 1 / -1;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.topbar-logo {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.topbar-logo span { color: var(--accent); }
+.topbar-pill {
+  font-size: 10px;
+  padding: 2px 8px;
+  background: var(--accent-bg, rgba(0,200,255,.1));
+  color: var(--accent);
+  border: 1px solid rgba(0,200,255,.25);
+  border-radius: 20px;
+  letter-spacing: .5px;
+}
+.topbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--low);
+  box-shadow: 0 0 6px var(--low);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+/* ─── SIDEBAR ────────────────────────────────────────────── */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  cursor: pointer;
+  color: var(--muted);
+  border-left: 3px solid transparent;
+  transition: all .2s;
+  font-size: 12.5px;
+  letter-spacing: .3px;
+}
+.nav-item:hover { color: var(--text); background: rgba(255,255,255,.03); }
+.nav-item.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  background: rgba(0,200,255,.06);
+}
+.nav-icon { font-size: 16px; }
+.sidebar-section {
+  padding: 16px 20px 6px;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+/* ─── MAIN CONTENT ───────────────────────────────────────── */
+.main {
+  overflow-y: auto;
+  padding: 24px;
+  background: var(--bg);
+}
+
+/* ─── PAGE ───────────────────────────────────────────────── */
+.page { display: none; }
+.page.active { display: block; animation: fadeIn .3s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+
+/* ─── PAGE HEADER ────────────────────────────────────────── */
+.page-header {
+  margin-bottom: 24px;
+}
+.page-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+.page-subtitle { color: var(--muted); font-size: 12px; margin-top: 4px; }
+
+/* ─── GRID ───────────────────────────────────────────────── */
+.grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 20px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; margin-bottom: 20px; }
+
+/* ─── STAT CARD ──────────────────────────────────────────── */
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+.stat-label { color: var(--muted); font-size: 11px; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 8px; }
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+}
+.stat-sub { color: var(--muted); font-size: 11px; margin-top: 4px; }
+
+/* ─── PATIENT TABLE ──────────────────────────────────────── */
+.table-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.table-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.table-title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+}
+.table-actions { display: flex; gap: 8px; }
+
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: rgba(255,255,255,.02);
+  border-bottom: 1px solid var(--border);
+}
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background .15s;
+  cursor: pointer;
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: rgba(255,255,255,.03); }
+tbody tr.top-priority { background: rgba(239,68,68,.06); }
+tbody td { padding: 12px 16px; color: var(--text); }
+
+/* ─── BADGES ─────────────────────────────────────────────── */
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.badge-low      { background: var(--low-bg);      color: var(--low);      border: 1px solid rgba(34,197,94,.25); }
+.badge-moderate { background: var(--moderate-bg); color: var(--moderate); border: 1px solid rgba(250,204,21,.25); }
+.badge-high     { background: var(--high-bg);     color: var(--high);     border: 1px solid rgba(249,115,22,.25); }
+.badge-critical { background: var(--critical-bg); color: var(--critical); border: 1px solid rgba(239,68,68,.25); }
+
+/* ─── PRIORITY BANNER ────────────────────────────────────── */
+.priority-banner {
+  background: linear-gradient(135deg, rgba(239,68,68,.15), rgba(249,115,22,.1));
+  border: 1px solid rgba(239,68,68,.3);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.priority-icon { font-size: 28px; }
+.priority-label { font-size: 11px; color: var(--muted); letter-spacing: .5px; text-transform: uppercase; }
+.priority-name {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+}
+.priority-ri { color: var(--critical); font-size: 13px; font-weight: 500; }
+
+/* ─── MONITORING PANEL ───────────────────────────────────── */
+.monitor-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.factor-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+.factor-label { color: var(--muted); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+.factor-val {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 8px;
+}
+.factor-bar-track {
+  height: 5px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.factor-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width .6s ease;
+}
+
+.ri-gauge {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.ri-num {
+  font-family: var(--font-display);
+  font-size: 64px;
+  font-weight: 800;
+  line-height: 1;
+  transition: color .4s;
+}
+.ri-caption { color: var(--muted); font-size: 12px; margin-top: 4px; }
+.ri-formula {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 12px;
+  font-style: italic;
+}
+
+/* ─── ALERTS BOX ─────────────────────────────────────────── */
+.alerts-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 20px;
+}
+.alerts-title {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 12px;
+}
+.alert-item {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  font-size: 12px;
+  border-left: 3px solid;
+}
+.alert-item:last-child { margin-bottom: 0; }
+.alert-critical { background: var(--critical-bg); border-color: var(--critical); color: #fca5a5; }
+.alert-warning   { background: var(--high-bg);    border-color: var(--high);    color: #fed7aa; }
+.alert-info      { background: var(--moderate-bg);border-color: var(--moderate);color: #fef08a; }
+.alert-ok {
+  background: var(--low-bg);
+  border-color: var(--low);
+  color: #bbf7d0;
+}
+
+/* ─── FORM ELEMENTS ──────────────────────────────────────── */
+.form-group { margin-bottom: 16px; }
+.form-label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.form-input, .form-select {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 9px 12px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  transition: border-color .2s;
+}
+.form-input:focus, .form-select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.form-select option { background: var(--surface); }
+
+.slider-row { display: flex; align-items: center; gap: 12px; }
+input[type=range] {
+  flex: 1;
+  -webkit-appearance: none;
+  background: var(--border);
+  height: 4px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--accent);
+}
+.slider-val {
+  min-width: 40px;
+  text-align: right;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* ─── BUTTONS ────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  transition: all .2s;
+  letter-spacing: .3px;
+}
+.btn-primary {
+  background: var(--accent2);
+  color: #fff;
+}
+.btn-primary:hover { background: #0066ee; transform: translateY(-1px); }
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--text);
+}
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+.btn-danger {
+  background: rgba(239,68,68,.15);
+  border: 1px solid rgba(239,68,68,.3);
+  color: var(--critical);
+}
+.btn-danger:hover { background: rgba(239,68,68,.25); }
+.btn-sm { padding: 6px 12px; font-size: 11px; }
+
+/* ─── SYSTEM HEALTH ──────────────────────────────────────── */
+.health-grid {
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.health-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.health-icon { font-size: 28px; }
+.health-name {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.health-status {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--low);
+}
+.health-status.offline { color: var(--critical); }
+
+.formula-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.formula-title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 14px;
+}
+.formula-eq {
+  font-size: 18px;
+  text-align: center;
+  color: var(--accent);
+  padding: 16px;
+  background: rgba(0,200,255,.06);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0,200,255,.15);
+  margin-bottom: 14px;
+  letter-spacing: .5px;
+}
+.formula-vars { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.formula-var {
+  font-size: 12px;
+  color: var(--muted);
+  padding: 8px 12px;
+  background: rgba(255,255,255,.02);
+  border-radius: var(--radius-sm);
+}
+.formula-var b { color: var(--text); }
+
+/* patient select in monitoring */
+.patient-select-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+.patient-select-row .form-select { max-width: 280px; }
+
+/* onboarding success msg */
+.success-msg {
+  display: none;
+  padding: 12px 16px;
+  background: var(--low-bg);
+  border: 1px solid rgba(34,197,94,.3);
+  border-radius: var(--radius-sm);
+  color: var(--low);
+  font-size: 12px;
+  margin-top: 12px;
+}
+
+/* auto-update ticker */
+.update-ticker {
+  font-size: 11px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.spinner {
+  width: 10px; height: 10px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* rank badge */
+.rank { color: var(--accent); font-weight: 600; }
+.rank-1 { color: var(--critical); }
+
+/* responsive tweaks */
+@media (max-width: 900px) {
+  .shell { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ── TOPBAR ──────────────────────────────────────── -->
+  <header class="topbar">
+    <div class="topbar-logo">⚕️ Care<span>Guard</span></div>
+    <div class="topbar-pill">AI CLINICAL SUPPORT</div>
+    <div class="topbar-right">
+      <div class="update-ticker">
+        <div class="spinner" id="spinnerIcon"></div>
+        <span id="updateLabel">Auto-updating…</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="status-dot"></div>
+        <span id="backendStatus">Connecting…</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── SIDEBAR ─────────────────────────────────────── -->
+  <nav class="sidebar">
+    <div class="sidebar-section">Navigation</div>
+    <div class="nav-item active" data-page="dashboard">
+      <span class="nav-icon">📊</span> Dashboard
+    </div>
+    <div class="nav-item" data-page="monitoring">
+      <span class="nav-icon">🔬</span> Monitoring
+    </div>
+    <div class="nav-item" data-page="onboarding">
+      <span class="nav-icon">➕</span> Add Patient
+    </div>
+    <div class="nav-item" data-page="health">
+      <span class="nav-icon">🛡️</span> System Health
+    </div>
+  </nav>
+
+  <!-- ── MAIN ────────────────────────────────────────── -->
+  <main class="main">
+
+    <!-- ══════════════════════════════════════════════════
+         PAGE 1: DASHBOARD
+    ══════════════════════════════════════════════════ -->
+    <div class="page active" id="page-dashboard">
+
+      <div class="page-header">
+        <div class="page-title">Patient Dashboard</div>
+        <div class="page-subtitle">Real-time risk index monitoring across all patients</div>
+      </div>
+
+      <!-- Summary stats -->
+      <div class="grid-3">
+        <div class="stat-card">
+          <div class="stat-label">Total Patients</div>
+          <div class="stat-value" id="statTotal">—</div>
+          <div class="stat-sub">Currently monitored</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">High Risk</div>
+          <div class="stat-value" id="statHigh" style="color:var(--high)">—</div>
+          <div class="stat-sub">RI ≥ 25</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Critical</div>
+          <div class="stat-value" id="statCrit" style="color:var(--critical)">—</div>
+          <div class="stat-sub">RI ≥ 50 — immediate action</div>
+        </div>
+      </div>
+
+      <!-- Priority banner -->
+      <div class="priority-banner" id="priorityBanner">
+        <div class="priority-icon">🚨</div>
+        <div>
+          <div class="priority-label">Top Priority</div>
+          <div class="priority-name" id="priorityName">Loading…</div>
+          <div class="priority-ri" id="priorityRI">Calculating risk index…</div>
+        </div>
+      </div>
+
+      <!-- Patient table -->
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-title">All Patients — Sorted by Risk Priority</div>
+          <div class="table-actions">
+<select id="modeToggle" onchange="switchMode()" style="padding:6px;background:#111;color:#fff;border:1px solid #333;border-radius:6px">
+  <option value="static">Static Demo</option>
+  <option value="dynamic">Dynamic Demo</option>
+</select>
+
+            <button class="btn btn-outline btn-sm" onclick="loadPatients()">↻ Refresh</button>
+            
+<button class="btn btn-outline btn-sm" onclick="runSimulation()">▶ Simulate</button>
+<button class="btn btn-outline btn-sm" onclick="toggleAutoSim()" id="autoBtn">⚡ Auto Sim OFF</button>
+
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Patient</th>
+              <th>Condition</th>
+              <th>Pressure</th>
+              <th>Time (min)</th>
+              <th>RI Score</th>
+              <th>Risk Level</th>
+              <th>Alerts</th>
+            </tr>
+          </thead>
+          <tbody id="patientTable">
+            <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">Loading patients…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div><!-- /dashboard -->
+
+
+    <!-- ══════════════════════════════════════════════════
+         PAGE 2: MONITORING
+    ══════════════════════════════════════════════════ -->
+    <div class="page" id="page-monitoring">
+
+      <div class="page-header">
+        <div class="page-title">Patient Monitoring</div>
+        <div class="page-subtitle">Detailed risk factor breakdown per patient</div>
+      </div>
+
+      <div class="patient-select-row">
+        <select class="form-select" id="monitorSelect" onchange="loadMonitorData()">
+          <option value="">— Select a patient —</option>
+        </select>
+        <button class="btn btn-outline btn-sm" onclick="loadMonitorData()">↻ Refresh</button>
+      </div>
+
+      <!-- RI Gauge -->
+      <div class="ri-gauge">
+        <div class="ri-num" id="monRI">—</div>
+        <div class="ri-caption">Risk Index (RI)</div>
+        <div id="monRisk" style="margin-top:8px">—</div>
+        <div class="ri-formula">RI = (P / 32) × T × F<sub>mo</sub> × F<sub>sh</sub> + S</div>
+      </div>
+
+      <!-- Factor cards -->
+      <div class="monitor-grid">
+
+        <div class="factor-card">
+          <div class="factor-label">Pressure (P)</div>
+          <div class="factor-val" id="monP">—</div>
+          <div class="factor-bar-track">
+            <div class="factor-bar-fill" id="monPBar" style="width:0%;background:var(--critical)"></div>
+          </div>
+          <div style="color:var(--muted);font-size:11px;margin-top:6px">mmHg / max 120</div>
+        </div>
+
+        <div class="factor-card">
+          <div class="factor-label">Time Immobile (T)</div>
+          <div class="factor-val" id="monT">—</div>
+          <div class="factor-bar-track">
+            <div class="factor-bar-fill" id="monTBar" style="width:0%;background:var(--moderate)"></div>
+          </div>
+          <div style="color:var(--muted);font-size:11px;margin-top:6px">Minutes / risk multiplier</div>
+        </div>
+
+        <div class="factor-card">
+          <div class="factor-label">Moisture Factor (F<sub>mo</sub>)</div>
+          <div class="factor-val" id="monFmo">—</div>
+          <div class="factor-bar-track">
+            <div class="factor-bar-fill" id="monFmoBar" style="width:0%;background:var(--accent)"></div>
+          </div>
+          <div style="color:var(--muted);font-size:11px;margin-top:6px">RH × Temp multiplier</div>
+        </div>
+
+        <div class="factor-card">
+          <div class="factor-label">Shear Factor (F<sub>sh</sub>)</div>
+          <div class="factor-val" id="monFsh">—</div>
+          <div class="factor-bar-track">
+            <div class="factor-bar-fill" id="monFshBar" style="width:0%;background:var(--high)"></div>
+          </div>
+          <div style="color:var(--muted);font-size:11px;margin-top:6px">Bed angle incline</div>
+        </div>
+
+        <div class="factor-card">
+          <div class="factor-label">Systemic Score (S)</div>
+          <div class="factor-val" id="monS">—</div>
+          <div class="factor-bar-track">
+            <div class="factor-bar-fill" id="monSBar" style="width:0%;background:var(--low)"></div>
+          </div>
+          <div style="color:var(--muted);font-size:11px;margin-top:6px">Medical condition weight</div>
+        </div>
+
+        <div class="factor-card">
+          <div class="factor-label">Bed Angle</div>
+          <div class="factor-val" id="monAngle">—</div>
+          <div class="factor-bar-track">
+            <div class="factor-bar-fill" id="monAngleBar" style="width:0%;background:var(--accent2)"></div>
+          </div>
+          <div style="color:var(--muted);font-size:11px;margin-top:6px">Degrees from horizontal</div>
+        </div>
+
+      </div>
+
+      <!-- Alerts -->
+      <div class="alerts-box">
+        <div class="alerts-title">⚠️ Smart Alerts</div>
+        <div id="monAlerts">
+          <div class="alert-item alert-ok">✓ Select a patient to view alerts</div>
+        </div>
+      </div>
+
+    </div><!-- /monitoring -->
+
+
+    <!-- ══════════════════════════════════════════════════
+         PAGE 3: ONBOARDING
+    ══════════════════════════════════════════════════ -->
+    <div class="page" id="page-onboarding">
+
+      <div class="page-header">
+        <div class="page-title">Add New Patient</div>
+        <div class="page-subtitle">Onboard a patient into the monitoring system</div>
+      </div>
+
+      <div class="grid-2">
+
+        <div class="table-wrap" style="padding:24px">
+          <div class="table-title" style="margin-bottom:20px">Patient Details</div>
+
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input class="form-input" id="newName" placeholder="e.g. Ravi Kumar" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Medical Condition</label>
+            <select class="form-select" id="newCondition">
+              <option value="Normal">Normal (S = 0)</option>
+              <option value="Diabetes">Diabetes (S = +2.0)</option>
+              <option value="Stroke">Stroke (S = +2.5)</option>
+              <option value="ICU Ventilated">ICU Ventilated (S = +2.5)</option>
+              <option value="Coma">Coma (S = +3.0)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Initial Pressure (mmHg) — <span id="lPressure">60</span></label>
+            <div class="slider-row">
+              <input type="range" min="20" max="120" value="60" id="newPressure"
+                     oninput="document.getElementById('lPressure').textContent=this.value" />
+              <span class="slider-val" id="lPressureV">60</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Time Immobile (min) — <span id="lTime">120</span></label>
+            <div class="slider-row">
+              <input type="range" min="0" max="600" value="120" id="newTime"
+                     oninput="document.getElementById('lTime').textContent=this.value" />
+              <span class="slider-val" id="lTimeV">120</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Relative Humidity % — <span id="lRH">65</span></label>
+            <div class="slider-row">
+              <input type="range" min="30" max="100" value="65" id="newRH"
+                     oninput="document.getElementById('lRH').textContent=this.value" />
+              <span class="slider-val" id="lRHV">65</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Skin Temperature (°C) — <span id="lTemp">36.0</span></label>
+            <div class="slider-row">
+              <input type="range" min="30" max="40" step="0.1" value="36" id="newTemp"
+                     oninput="document.getElementById('lTemp').textContent=parseFloat(this.value).toFixed(1)" />
+              <span class="slider-val" id="lTempV">36.0</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Bed Angle (°) — <span id="lAngle">15</span></label>
+            <div class="slider-row">
+              <input type="range" min="0" max="80" value="15" id="newAngle"
+                     oninput="document.getElementById('lAngle').textContent=this.value" />
+              <span class="slider-val" id="lAngleV">15</span>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" onclick="addPatient()" style="width:100%;justify-content:center;margin-top:8px">
+            ➕ Add to Monitoring System
+          </button>
+
+          <div class="success-msg" id="addSuccess"></div>
+        </div>
+
+        <!-- Right: live RI preview -->
+        <div>
+          <div class="ri-gauge">
+            <div class="ri-num" id="previewRI">—</div>
+            <div class="ri-caption">Live RI Preview</div>
+            <div id="previewRisk" style="margin-top:8px">—</div>
+            <div class="ri-formula">Calculated as you adjust sliders</div>
+          </div>
+          <div class="alerts-box">
+            <div class="alerts-title">⚠️ Predicted Alerts</div>
+            <div id="previewAlerts">
+              <div class="alert-item alert-ok">Adjust sliders to preview alerts</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div><!-- /onboarding -->
+
+
+    <!-- ══════════════════════════════════════════════════
+         PAGE 4: SYSTEM HEALTH
+    ══════════════════════════════════════════════════ -->
+    <div class="page" id="page-health">
+
+      <div class="page-header">
+        <div class="page-title">System Health</div>
+        <div class="page-subtitle">Backend status, AI engine, and sensor simulation</div>
+      </div>
+
+      <div class="health-grid">
+        <div class="health-card">
+          <div class="health-icon">🖥️</div>
+          <div>
+            <div class="health-name">Backend Server</div>
+            <div class="health-status" id="hBackend">Checking…</div>
+          </div>
+        </div>
+        <div class="health-card">
+          <div class="health-icon">🤖</div>
+          <div>
+            <div class="health-name">AI Model</div>
+            <div class="health-status" id="hModel">Checking…</div>
+          </div>
+        </div>
+        <div class="health-card">
+          <div class="health-icon">⚙️</div>
+          <div>
+            <div class="health-name">RI Engine</div>
+            <div class="health-status" id="hEngine">Checking…</div>
+          </div>
+        </div>
+        <div class="health-card">
+          <div class="health-icon">📡</div>
+          <div>
+            <div class="health-name">Sensor Simulation</div>
+            <div class="health-status" id="hSensor">Checking…</div>
+          </div>
+        </div>
+        <div class="health-card">
+          <div class="health-icon">🏥</div>
+          <div>
+            <div class="health-name">Monitored Patients</div>
+            <div class="health-status" id="hPatients">—</div>
+          </div>
+        </div>
+        <div class="health-card">
+          <div class="health-icon">⏱️</div>
+          <div>
+            <div class="health-name">System Uptime</div>
+            <div class="health-status" id="hUptime">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formula reference -->
+      <div class="formula-box">
+        <div class="formula-title">Core AI Formula</div>
+        <div class="formula-eq">RI = ( P / 32 ) × T × F<sub>mo</sub> × F<sub>sh</sub> + S</div>
+        <div class="formula-vars">
+          <div class="formula-var"><b>P</b> — Pressure in mmHg</div>
+          <div class="formula-var"><b>T</b> — Time immobility multiplier</div>
+          <div class="formula-var"><b>F<sub>mo</sub></b> — Moisture × temperature factor</div>
+          <div class="formula-var"><b>F<sub>sh</sub></b> — Shear factor from bed angle</div>
+          <div class="formula-var"><b>S</b> — Systemic medical score</div>
+          <div class="formula-var"><b>RI &lt; 10</b> = Low risk</div>
+          <div class="formula-var"><b>RI 10–25</b> = Moderate risk</div>
+          <div class="formula-var"><b>RI 25–50</b> = High risk</div>
+          <div class="formula-var"><b>RI ≥ 50</b> = Very High / Critical</div>
+        </div>
+      </div>
+
+      <button class="btn btn-outline" onclick="loadSystemHealth()">↻ Refresh Status</button>
+    </div><!-- /health -->
+
+  </main>
+</div><!-- /shell -->
+
+<script>
+/* ──────────────────────────────────────────────────────────
+   CONFIGURATION
+──────────────────────────────────────────────────────────── */
+const API = "http://127.0.0.1:5000";   // Flask backend URL
+let autoUpdateInterval = null;
+let patientCache = [];                 // cache of loaded patients
+
+/* ──────────────────────────────────────────────────────────
+   NAVIGATION
+──────────────────────────────────────────────────────────── */
+
+document.querySelectorAll(".nav-item").forEach(item => {
+
+  item.addEventListener("click", () => {
+    document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    item.classList.add("active");
+    const page = item.dataset.page;
+    document.getElementById("page-" + page).classList.add("active");
+
+    // Trigger data loads per page
+    if (page === "dashboard")  setTimeout(loadPatients,500);
+    if (page === "monitoring") populateMonitorSelect();
+    if (page === "health")     loadSystemHealth();
+  });
+});
+
+/* ──────────────────────────────────────────────────────────
+   HELPER: RISK COLOR CLASS
+──────────────────────────────────────────────────────────── */
+function riskClass(level) {
+  const map = { "Low":"low", "Moderate":"moderate", "High":"high", "Very High":"critical" };
+  return "badge-" + (map[level] || "low");
+}
+function riskColor(level) {
+  const map = { "Low":"var(--low)", "Moderate":"var(--moderate)", "High":"var(--high)", "Very High":"var(--critical)" };
+  return map[level] || "var(--text)";
+}
+
+/* ──────────────────────────────────────────────────────────
+   HELPER: FORMAT SECONDS AS HH:MM:SS
+──────────────────────────────────────────────────────────── */
+function formatUptime(s) {
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+/* ──────────────────────────────────────────────────────────
+   LOAD ALL PATIENTS (Dashboard + cache)
+──────────────────────────────────────────────────────────── */
+async function loadPatients() {
+  try {
+    const res = await fetch(`${API}/patients`);
+    const patients = await res.json();
+    patientCache = patients;
+
+    // ── Summary stats ──
+    document.getElementById("statTotal").textContent = patients.length;
+    document.getElementById("statHigh").textContent  = patients.filter(p => p.ri >= 25).length;
+    document.getElementById("statCrit").textContent  = patients.filter(p => p.ri >= 50).length;
+
+    // ── Priority banner (first = highest priority) ──
+    if (patients.length > 0) {
+      const top = patients[0];
+      document.getElementById("priorityName").textContent = `Attend ${top.name} First`;
+      document.getElementById("priorityRI").textContent   = `RI = ${top.ri} — ${top.risk_level}`;
+    }
+
+    // ── Build table rows ──
+    const tbody = document.getElementById("patientTable");
+    tbody.innerHTML = patients.map((p, i) => {
+      const isTop = i === 0;
+      const alertCount = p.alerts.length;
+      const alertBadge = alertCount > 0
+        ? `<span style="color:var(--critical)">${alertCount} alert${alertCount>1?'s':''}</span>`
+        : `<span style="color:var(--low)">✓ Clear</span>`;
+
+      return `
+        <tr class="${isTop ? 'top-priority' : ''}"
+            onclick="goMonitor(${p.id})" title="Click to monitor">
+          <td class="${i===0?'rank-1':'rank'}">${isTop ? '🔴' : '#' + p.priority}</td>
+          <td style="color:#fff;font-weight:500">${p.name}</td>
+          <td><span style="color:var(--muted)">${p.condition}</span></td>
+          <td>${p.pressure} mmHg</td>
+          <td>${p.time} min</td>
+          <td style="color:${riskColor(p.risk_level)};font-family:var(--font-display);font-weight:700;font-size:15px">${p.ri}</td>
+          <td><span class="badge ${riskClass(p.risk_level)}">${p.risk_level}</span></td>
+          <td>${alertBadge}</td>
+        </tr>`;
+    }).join("");
+
+    document.getElementById("backendStatus").textContent = "Backend Online";
+  } catch (e) {
+    // Backend offline — show fallback
+    document.getElementById("backendStatus").textContent = "Backend Offline";
+    document.getElementById("patientTable").innerHTML =
+      `<tr><td colspan="8" style="text-align:center;color:var(--critical);padding:24px">
+        ⚠️ Cannot reach backend. Is Flask running on port 5000?
+      </td></tr>`;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────
+   GO TO MONITOR PAGE FOR A SPECIFIC PATIENT
+──────────────────────────────────────────────────────────── */
+function goMonitor(patientId) {
+  // Switch to monitoring page
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelector('[data-page="monitoring"]').classList.add("active");
+  document.getElementById("page-monitoring").classList.add("active");
+
+  // Set the select and load
+  populateMonitorSelect(patientId);
+}
+
+/* ──────────────────────────────────────────────────────────
+   MONITORING PAGE
+──────────────────────────────────────────────────────────── */
+function populateMonitorSelect(selectId = null) {
+  const sel = document.getElementById("monitorSelect");
+  const current = selectId || sel.value;
+  sel.innerHTML = '<option value="">— Select a patient —</option>' +
+    patientCache.map(p =>
+      `<option value="${p.id}">${p.name} (RI: ${p.ri})</option>`
+    ).join("");
+  if (current) {
+    sel.value = current;
+    loadMonitorData();
+  }
+}
+
+function loadMonitorData() {
+  const sel  = document.getElementById("monitorSelect");
+  const id   = parseInt(sel.value);
+  if (!id) return;
+
+  const p = patientCache.find(x => x.id === id);
+  if (!p) return;
+
+  // RI gauge
+  document.getElementById("monRI").textContent = p.ri;
+  document.getElementById("monRI").style.color = riskColor(p.risk_level);
+  document.getElementById("monRisk").innerHTML =
+    `<span class="badge ${riskClass(p.risk_level)}">${p.risk_level}</span>`;
+
+  // Factor cards
+  setFactor("monP",     p.pressure,   `${p.pressure} mmHg`, p.pressure / 120 * 100);
+  setFactor("monT",     p.T,          `${p.T}×`,            Math.min(100, p.T / 4 * 100));
+  setFactor("monFmo",   p.Fmo,        p.Fmo,                (p.Fmo - 1) / 1.5 * 100);
+  setFactor("monFsh",   p.Fsh,        p.Fsh,                (p.Fsh - 1) / 2 * 100);
+  setFactor("monS",     p.S,          `${p.S} pts`,         p.S / 3 * 100);
+  setFactor("monAngle", p.angle,      `${p.angle}°`,        p.angle / 80 * 100);
+
+  // Alerts
+  renderAlerts("monAlerts", p.alerts);
+}
+
+function setFactor(id, val, display, pct) {
+  document.getElementById(id).textContent = display;
+  const bar = document.getElementById(id + "Bar");
+  if (bar) bar.style.width = Math.max(0, Math.min(100, pct)) + "%";
+}
+
+function renderAlerts(containerId, alerts) {
+  const el = document.getElementById(containerId);
+  if (!alerts || alerts.length === 0) {
+    el.innerHTML = '<div class="alert-item alert-ok">✓ No active alerts for this patient</div>';
+    return;
+  }
+  el.innerHTML = alerts.map((a, i) => {
+    const cls = i === 0 ? "alert-critical" : (i === 1 ? "alert-warning" : "alert-info");
+    return `<div class="alert-item ${cls}">${a}</div>`;
+  }).join("");
+}
+
+/* ──────────────────────────────────────────────────────────
+   LIVE PREVIEW ON ONBOARDING PAGE
+──────────────────────────────────────────────────────────── */
+async function previewRI() {
+  const payload = {
+    pressure: +document.getElementById("newPressure").value,
+    time:     +document.getElementById("newTime").value,
+    rh:       +document.getElementById("newRH").value,
+    temp:     +document.getElementById("newTemp").value,
+    angle:    +document.getElementById("newAngle").value,
+    S: { "Normal":0, "Diabetes":2, "Stroke":2.5, "ICU Ventilated":2.5, "Coma":3 }
+        [document.getElementById("newCondition").value] || 0
+  };
+
+  // Update slider display labels
+  document.getElementById("lPressure").textContent = payload.pressure;
+  document.getElementById("lTime").textContent = payload.time;
+  document.getElementById("lRH").textContent = payload.rh;
+  document.getElementById("lTemp").textContent = payload.temp.toFixed(1);
+  document.getElementById("lAngle").textContent = payload.angle;
+
+  try {
+    const res = await fetch(`${API}/predict`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    document.getElementById("previewRI").textContent = data.ri;
+    document.getElementById("previewRI").style.color = riskColor(data.risk_level);
+    document.getElementById("previewRisk").innerHTML =
+      `<span class="badge ${riskClass(data.risk_level)}">${data.risk_level}</span>`;
+    renderAlerts("previewAlerts", data.alerts);
+  } catch {}
+}
+
+// Attach live preview to all onboarding sliders
+["newPressure","newTime","newRH","newTemp","newAngle","newCondition"].forEach(id => {
+  document.getElementById(id)?.addEventListener("input", previewRI);
+  document.getElementById(id)?.addEventListener("change", previewRI);
+});
+
+/* ──────────────────────────────────────────────────────────
+   ADD PATIENT
+──────────────────────────────────────────────────────────── */
+async function addPatient() {
+  const name = document.getElementById("newName").value.trim();
+  if (!name) { alert("Please enter a patient name."); return; }
+
+  const payload = {
+    name,
+    condition: document.getElementById("newCondition").value,
+    pressure:  +document.getElementById("newPressure").value,
+    time:      +document.getElementById("newTime").value,
+    rh:        +document.getElementById("newRH").value,
+    temp:      +document.getElementById("newTemp").value,
+    angle:     +document.getElementById("newAngle").value,
+  };
+
+  try {
+    const res = await fetch(`${API}/add_patient`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    const msg = document.getElementById("addSuccess");
+    msg.style.display = "block";
+    msg.textContent = `✓ ${data.message} (ID #${data.id})`;
+    document.getElementById("newName").value = "";
+    // Reload patient cache
+    await setTimeout(loadPatients,500);
+    setTimeout(() => { msg.style.display = "none"; }, 4000);
+  } catch (e) {
+    alert("Could not add patient. Is the backend running?");
+  }
+}
+
+/* ──────────────────────────────────────────────────────────
+   SYSTEM HEALTH
+──────────────────────────────────────────────────────────── */
+async function loadSystemHealth() {
+  try {
+    const res = await fetch(`${API}/system_status`);
+    const s = await res.json();
+
+    const setStatus = (id, val, good = true) => {
+      const el = document.getElementById(id);
+      el.textContent = val;
+      el.className = "health-status" + (good ? "" : " offline");
+    };
+
+    setStatus("hBackend",  s.backend   === "online"  ? "✓ Online"  : "✗ Offline",  s.backend === "online");
+    setStatus("hModel",    s.ai_model  === "active"  ? "✓ Active"  : "✗ Inactive", s.ai_model === "active");
+    setStatus("hEngine",   s.ri_engine === "running" ? "✓ Running" : "✗ Stopped",  s.ri_engine === "running");
+    setStatus("hSensor",   s.sensor_sim=== "active"  ? "✓ Active"  : "✗ Inactive", s.sensor_sim === "active");
+    setStatus("hPatients", `${s.patient_count} patients`);
+    setStatus("hUptime",   formatUptime(s.uptime_seconds));
+
+  } catch {
+    ["hBackend","hModel","hEngine","hSensor"].forEach(id => {
+      const el = document.getElementById(id);
+      el.textContent = "✗ Offline";
+      el.className = "health-status offline";
+    });
+  }
+}
+
+/* ──────────────────────────────────────────────────────────
+   AUTO UPDATE — simulates sensor feed every 8 seconds
+──────────────────────────────────────────────────────────── */
+async function runAutoUpdate() {
+  // Tell backend to simulate sensor movement
+  try { await fetch(`${API}/simulate_update`, { method: "POST" }); } catch {}
+  // Re-fetch patients
+  await setTimeout(loadPatients,500);
+  // Refresh monitoring panel if open
+  const monPage = document.getElementById("page-monitoring");
+  if (monPage.classList.contains("active")) {
+    populateMonitorSelect();
+  }
+}
+
+// Start auto-update loop
+autoUpdateInterval = setInterval(runAutoUpdate, 8000);
+
+/* ──────────────────────────────────────────────────────────
+   INITIAL LOAD
+──────────────────────────────────────────────────────────── */
+setTimeout(loadPatients,500);
+loadSystemHealth();
+previewRI();
+
+let autoSim=false;
+let simInt=null;
+
+async function runSimulation(){
+  try{
+    await fetch(`${API}/simulate_update`,{method:"POST"});
+    await setTimeout(loadPatients,500);
+  }catch(e){console.error(e);}
+}
+
+function toggleAutoSim(){
+  autoSim=!autoSim;
+  const btn=document.getElementById("autoBtn");
+  if(autoSim){
+    btn.textContent="⚡ Auto Sim ON";
+    simInt=setInterval(runSimulation,3000);
+  }else{
+    btn.textContent="⚡ Auto Sim OFF";
+    clearInterval(simInt);
+  }
+}
+
+
+let mode = "static";
+
+function switchMode(){
+  mode = document.getElementById("modeToggle").value;
+  if(mode==="static"){
+    clearInterval(simInt);
+    document.getElementById("autoBtn").textContent="⚡ Auto Sim OFF";
+    autoSim=false;
+  }else{
+    if(!autoSim){
+      toggleAutoSim();
+    }
+  }
+}
+
+
+async function previewRI(){
+ try{
+  const payload={
+    pressure:+document.getElementById("newPressure").value,
+    time:+document.getElementById("newTime").value,
+    rh:+document.getElementById("newRH").value,
+    temp:+document.getElementById("newTemp").value,
+    angle:+document.getElementById("newAngle").value,
+    S:0
+  };
+  const res=await fetch(`${API}/predict`,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(payload)
+  });
+  const d=await res.json();
+  document.getElementById("previewRI").textContent=d.ri;
+  document.getElementById("previewRisk").textContent=d.risk_level;
+ }catch(e){console.log(e);}
+}
+</script>
+
+</body>
+</html>
