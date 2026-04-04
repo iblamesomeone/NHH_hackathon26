@@ -1,1331 +1,1816 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light" data-lang="both">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>CareGuard — Bedsore Prevention System</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>CareGuard | HAPU Prevention</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=DM+Mono:wght@500;700&display=swap" rel="stylesheet"/>
 <style>
-/* ─── DESIGN SYSTEM ─────────────────────────────────────── */
-:root {
-  --bg:       #0a0d12;
-  --surface:  #111620;
-  --card:     #161d2a;
-  --border:   #1e2a3a;
-  --border2:  #243347;
-  --text:     #c8d8f0;
-  --muted:    #5a7090;
-  --accent:   #00c8ff;
-  --accent2:  #0077ff;
+/* ══════════════════════════════════════════════════
+   CAREGUARD — Design System (somewhere_.html aesthetic)
+══════════════════════════════════════════════════ */
+:root{
+  --bg:#f4f7fa;--bg2:#eaeff5;--surface:#fff;--surface2:rgba(255,255,255,0.92);
+  --border:#e2e8f0;--border2:#cbd5e1;
+  --text:#0f172a;--text2:#334155;--muted:#64748b;
+  --accent:#0f766e;--accent-soft:#ccfbf1;--accent-str:#115e59;
+  --safe:#10b981;--safe-bg:#d1fae5;--safe-bd:#6ee7b7;
+  --low:#f59e0b;--low-bg:#fef3c7;--low-bd:#fcd34d;
+  --mod:#f97316;--mod-bg:#ffedd5;--mod-bd:#fdba74;
+  --high:#ef4444;--high-bg:#fee2e2;--high-bd:#fca5a5;
+  --crit:#b91c1c;--crit-bg:#fef2f2;--crit-bd:#fecaca;
+  --sh:0 2px 8px rgba(0,0,0,0.06),0 1px 3px rgba(0,0,0,0.04);
+  --sh-lg:0 10px 25px rgba(0,0,0,0.1),0 4px 10px rgba(0,0,0,0.06);
+  --r:12px;--rs:8px;--rx:6px;
+  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+  --sb:272px;--tb:60px;
+}
+[data-theme="dark"]{
+  --bg:#0f172a;--bg2:#1e293b;--surface:#1e293b;--surface2:rgba(30,41,59,0.92);
+  --border:#334155;--border2:#475569;
+  --text:#f8fafc;--text2:#cbd5e1;--muted:#94a3b8;
+  --accent:#14b8a6;--accent-soft:rgba(20,184,166,0.15);--accent-str:#0d9488;
+  --safe:#34d399;--safe-bg:rgba(52,211,153,0.12);--safe-bd:rgba(52,211,153,0.3);
+  --low:#fbbf24;--low-bg:rgba(251,191,36,0.12);--low-bd:rgba(251,191,36,0.3);
+  --mod:#fb923c;--mod-bg:rgba(251,146,60,0.12);--mod-bd:rgba(251,146,60,0.3);
+  --high:#f87171;--high-bg:rgba(248,113,113,0.12);--high-bd:rgba(248,113,113,0.3);
+  --crit:#f43f5e;--crit-bg:rgba(244,63,94,0.14);--crit-bd:rgba(244,63,94,0.32);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px;scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+button,input,select,textarea{font:inherit;cursor:pointer}
+a{color:inherit;text-decoration:none}
 
-  --low:      #22c55e;
-  --moderate: #facc15;
-  --high:     #f97316;
-  --critical: #ef4444;
+/* ── Layout ── */
+.shell{display:flex;min-height:100vh}
+.sidebar{width:var(--sb);flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
+  position:fixed;top:0;left:0;bottom:0;z-index:100;display:flex;flex-direction:column;
+  padding:20px 16px;gap:4px;overflow-y:auto;transition:background .3s,border .3s}
+.main{margin-left:var(--sb);flex:1;display:flex;flex-direction:column}
+.topbar{height:var(--tb);background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;padding:0 24px;
+  position:sticky;top:0;z-index:99;gap:12px}
+.content{padding:22px 24px;flex:1;display:flex;flex-direction:column;gap:18px;max-width:1440px;width:100%}
 
-  --low-bg:      rgba(34,197,94,.12);
-  --moderate-bg: rgba(250,204,21,.12);
-  --high-bg:     rgba(249,115,22,.12);
-  --critical-bg: rgba(239,68,68,.12);
+/* ── Brand ── */
+.brand{display:flex;align-items:center;gap:12px;padding:8px 10px;margin-bottom:12px;
+  border-radius:var(--rs);background:var(--accent-soft);border:1px solid rgba(15,118,110,.15)}
+.brand-icon{width:36px;height:36px;border-radius:10px;background:var(--accent);
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;flex-shrink:0}
+.brand-name{font-size:16px;font-weight:800;letter-spacing:-0.03em;color:var(--accent)}
+.brand-sub{font-size:10px;color:var(--muted);font-weight:600;line-height:1.3}
 
-  --font-display: 'Syne', sans-serif;
-  --font-mono:    'DM Mono', monospace;
+/* ── Nav ── */
+.nav-sep{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+  padding:10px 10px 4px;margin-top:4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--rs);
+  color:var(--text2);font-size:13px;font-weight:700;cursor:pointer;border:1px solid transparent;
+  background:none;width:100%;text-align:left;transition:all .18s;line-height:1.3}
+.nav-item:hover{background:var(--accent-soft);color:var(--accent)}
+.nav-item.active{background:var(--accent-soft);color:var(--accent);border-color:rgba(15,118,110,.18)}
+.nav-item .ico{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.nav-item .nbadge{margin-left:auto;font-size:10px;font-weight:800;padding:2px 6px;border-radius:99px;
+  background:var(--crit-bg);color:var(--crit);border:1px solid var(--crit-bd)}
 
-  --radius: 12px;
-  --radius-sm: 7px;
-  --shadow: 0 4px 24px rgba(0,0,0,.5);
-}
+/* ── Sidebar cards ── */
+.sb-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:14px}
+.sb-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:10px}
+.rl-item{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:12px;font-weight:600;color:var(--text2)}
+.rl-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.sidebar-foot{margin-top:auto;padding-top:12px;border-top:1px solid var(--border);
+  font-size:11px;color:var(--muted);text-align:center}
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ── Topbar ── */
+.tl{display:flex;align-items:center;gap:10px}
+.page-title{font-size:17px;font-weight:800;letter-spacing:-.03em}
+.page-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.tr{display:flex;align-items:center;gap:8px}
+.sbadge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;
+  font-size:11px;font-weight:700;border:1px solid;white-space:nowrap}
+.sbadge.ok{background:var(--safe-bg);border-color:var(--safe-bd);color:var(--safe)}
+.sbadge.alert{background:var(--crit-bg);border-color:var(--crit-bd);color:var(--crit)}
+.sbadge.elev{background:var(--mod-bg);border-color:var(--mod-bd);color:var(--mod)}
+.sbadge.idle{background:var(--bg2);border-color:var(--border2);color:var(--muted)}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.ib{padding:6px 12px;border-radius:var(--rx);border:1px solid var(--border);background:var(--surface);
+  color:var(--text);font-size:12px;font-weight:700;transition:all .18s}
+.ib:hover{background:var(--accent-soft);color:var(--accent);border-color:rgba(15,118,110,.2)}
 
-html { scroll-behavior: smooth; }
+/* ── Mode tabs ── */
+.mode-tabs{display:flex;gap:2px;background:var(--bg2);padding:3px;border-radius:var(--rx);border:1px solid var(--border)}
+.mode-tab{padding:5px 12px;border-radius:4px;font-size:12px;font-weight:700;border:none;
+  background:none;color:var(--muted);cursor:pointer;transition:all .18s}
+.mode-tab.active{background:var(--surface);color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.1)}
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-mono);
-  font-size: 13px;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
+/* ── Pages ── */
+.page{display:none;flex-direction:column;gap:18px;animation:fadeIn .25s ease}
+.page.active{display:flex}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
-/* ── scrollbar ── */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 15px;
+  border-radius:var(--rs);font-size:13px;font-weight:700;border:1px solid transparent;
+  transition:all .18s;line-height:1;white-space:nowrap}
+.btn:hover{transform:translateY(-1px);box-shadow:var(--sh)}
+.btn:active{transform:translateY(0)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:var(--accent-str)}
+.btn-secondary{background:var(--accent-soft);color:var(--accent);border-color:rgba(15,118,110,.2)}
+.btn-ghost{background:var(--surface);color:var(--text2);border-color:var(--border)}
+.btn-danger{background:var(--high-bg);color:var(--high);border-color:var(--high-bd)}
+.btn-success{background:var(--safe-bg);color:var(--safe);border-color:var(--safe-bd)}
+.btn-warn{background:var(--mod-bg);color:var(--mod);border-color:var(--mod-bd)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-xs{padding:4px 8px;font-size:11px;border-radius:5px}
+.btn-group{display:flex;flex-wrap:wrap;gap:6px}
+.btn-ai{display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#4f46e5,#7c3aed);
+  color:#fff;padding:6px 12px;border-radius:var(--rx);font-size:11.5px;font-weight:700;
+  border:none;box-shadow:var(--sh);cursor:pointer;transition:all .18s}
+.btn-ai:hover{opacity:.9;transform:translateY(-1px)}
 
-/* ─── LAYOUT ─────────────────────────────────────────────── */
-.shell {
-  display: grid;
-  grid-template-columns: 220px 1fr;
-  grid-template-rows: 56px 1fr;
-  height: 100vh;
-}
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:var(--sh)}
+.card:hover{box-shadow:var(--sh-lg)}
+.ch{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:14px}
+.ct{font-size:14px;font-weight:800;letter-spacing:-.02em}
+.cs{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.5}
 
-/* ─── TOPBAR ─────────────────────────────────────────────── */
-.topbar {
-  grid-column: 1 / -1;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  padding: 0 24px;
-  gap: 16px;
-  position: sticky;
-  top: 0;
-  z-index: 50;
-}
-.topbar-logo {
-  font-family: var(--font-display);
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.topbar-logo span { color: var(--accent); }
-.topbar-pill {
-  font-size: 10px;
-  padding: 2px 8px;
-  background: var(--accent-bg, rgba(0,200,255,.1));
-  color: var(--accent);
-  border: 1px solid rgba(0,200,255,.25);
-  border-radius: 20px;
-  letter-spacing: .5px;
-}
-.topbar-right {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  color: var(--muted);
-  font-size: 12px;
-}
-.status-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--low);
-  box-shadow: 0 0 6px var(--low);
-  animation: pulse 2s infinite;
-}
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+/* ── Stat cards ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.scard{background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:16px 18px;transition:all .2s}
+.scard:hover{box-shadow:var(--sh);border-color:var(--border2)}
+.sl{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.sv{font-family:var(--mono);font-size:28px;font-weight:700;line-height:1;letter-spacing:-.04em}
+.sv.safe{color:var(--safe)}.sv.low{color:var(--low)}.sv.mod{color:var(--mod)}.sv.high{color:var(--high)}.sv.crit{color:var(--crit)}
+.sn{font-size:11px;color:var(--muted);margin-top:6px}
 
-/* ─── SIDEBAR ────────────────────────────────────────────── */
-.sidebar {
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  padding: 20px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 20px;
-  cursor: pointer;
-  color: var(--muted);
-  border-left: 3px solid transparent;
-  transition: all .2s;
-  font-size: 12.5px;
-  letter-spacing: .3px;
-}
-.nav-item:hover { color: var(--text); background: rgba(255,255,255,.03); }
-.nav-item.active {
-  color: var(--accent);
-  border-left-color: var(--accent);
-  background: rgba(0,200,255,.06);
-}
-.nav-icon { font-size: 16px; }
-.sidebar-section {
-  padding: 16px 20px 6px;
-  font-size: 10px;
-  letter-spacing: 1.5px;
-  color: var(--muted);
-  text-transform: uppercase;
-}
+/* ── Chip ── */
+.chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:99px;
+  font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border:1px solid;white-space:nowrap}
+.chip::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
+.chip.safe{background:var(--safe-bg);color:var(--safe);border-color:var(--safe-bd)}
+.chip.low{background:var(--low-bg);color:var(--low);border-color:var(--low-bd)}
+.chip.mod{background:var(--mod-bg);color:var(--mod);border-color:var(--mod-bd)}
+.chip.high{background:var(--high-bg);color:var(--high);border-color:var(--high-bd)}
+.chip.crit{background:var(--crit-bg);color:var(--crit);border-color:var(--crit-bd)}
 
-/* ─── MAIN CONTENT ───────────────────────────────────────── */
-.main {
-  overflow-y: auto;
-  padding: 24px;
-  background: var(--bg);
-}
+/* ── Priority Banner ── */
+.priority-banner{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+  padding:20px 24px;box-shadow:var(--sh);display:grid;grid-template-columns:auto 1fr auto;gap:20px;align-items:center}
+.pf{padding:6px 13px;border-radius:99px;background:var(--crit-bg);color:var(--crit);
+  border:1px solid var(--crit-bd);font-size:10px;font-weight:900;letter-spacing:.12em;
+  text-transform:uppercase;white-space:nowrap;align-self:flex-start}
+.pname{font-size:clamp(18px,2vw,26px);font-weight:800;letter-spacing:-.04em;line-height:1.1}
+.pmeta{font-size:12px;color:var(--muted);margin-top:4px}
+.padv{font-size:13px;line-height:1.7;margin-top:8px;color:var(--text2)}
+.pside{display:flex;flex-direction:column;gap:8px;align-items:flex-end;min-width:200px}
 
-/* ─── PAGE ───────────────────────────────────────────────── */
-.page { display: none; }
-.page.active { display: block; animation: fadeIn .3s ease; }
-@keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+/* ── Grid helpers ── */
+.g2{display:grid;grid-template-columns:1.3fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.g6{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.grow{display:flex;flex-direction:column;gap:16px}
+.dash-grid{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start}
 
-/* ─── PAGE HEADER ────────────────────────────────────────── */
-.page-header {
-  margin-bottom: 24px;
-}
-.page-title {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: -0.5px;
-}
-.page-subtitle { color: var(--muted); font-size: 12px; margin-top: 4px; }
+/* ── Table ── */
+.tw{overflow:auto;border-radius:var(--rs);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;min-width:700px}
+thead th{background:var(--bg2);color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.09em;
+  text-transform:uppercase;padding:11px 14px;text-align:left;border-bottom:1px solid var(--border);
+  white-space:nowrap;position:sticky;top:0}
+thead th .formula{font-size:9px;font-family:var(--mono);font-weight:500;letter-spacing:0;text-transform:none;
+  display:block;margin-top:2px;color:var(--accent);opacity:.8}
+tbody td{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:var(--accent-soft)}
+tbody tr.prow td{background:var(--crit-bg)}
+.pbtn{background:none;border:none;color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;padding:0}
+.pbtn:hover{text-decoration:underline}
+.psub{font-size:10.5px;color:var(--muted);margin-top:2px}
+.mono{font-family:var(--mono);font-weight:500}
 
-/* ─── GRID ───────────────────────────────────────────────── */
-.grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 20px; }
-.grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; margin-bottom: 20px; }
+/* ── Progress bar (Braden) — FIXED: scale 6-23 mapped to 0-100% ── */
+.progress-bg{height:7px;border-radius:4px;background:var(--border);overflow:hidden;margin-top:5px;width:80px}
+.progress-fill{height:100%;border-radius:4px;transition:width .4s ease}
 
-/* ─── STAT CARD ──────────────────────────────────────────── */
-.stat-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px;
-}
-.stat-label { color: var(--muted); font-size: 11px; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 8px; }
-.stat-value {
-  font-family: var(--font-display);
-  font-size: 28px;
-  font-weight: 800;
-  color: #fff;
-  line-height: 1;
-}
-.stat-sub { color: var(--muted); font-size: 11px; margin-top: 4px; }
+/* ── Risk factor bars ── */
+.fr{padding:11px 13px;border:1px solid var(--border);border-radius:var(--rx);background:var(--bg)}
+.fh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:12.5px;font-weight:700}
+.track{height:7px;border-radius:99px;background:var(--bg2);overflow:hidden;margin-top:3px}
+.tf{height:100%;border-radius:99px;transition:width .4s ease}
+.tf-safe{background:linear-gradient(90deg,#4ade80,var(--safe))}
+.tf-low{background:linear-gradient(90deg,#fde047,var(--low))}
+.tf-mod{background:linear-gradient(90deg,#fdba74,var(--mod))}
+.tf-high{background:linear-gradient(90deg,#fca5a5,var(--high))}
+.tf-crit{background:linear-gradient(90deg,#fda4af,var(--crit))}
 
-/* ─── PATIENT TABLE ──────────────────────────────────────── */
-.table-wrap {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  margin-bottom: 20px;
-}
-.table-header {
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.table-title {
-  font-family: var(--font-display);
-  font-size: 14px;
-  font-weight: 600;
-  color: #fff;
-}
-.table-actions { display: flex; gap: 8px; }
+/* ── Metric cards ── */
+.mc{background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:14px}
+.ml{font-size:10px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.mv{font-family:var(--mono);font-size:20px;font-weight:700;line-height:1.1}
+.mn{font-size:10.5px;color:var(--muted);margin-top:5px}
 
-table { width: 100%; border-collapse: collapse; }
-thead th {
-  padding: 10px 16px;
-  text-align: left;
-  font-size: 10px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--muted);
-  background: rgba(255,255,255,.02);
-  border-bottom: 1px solid var(--border);
-}
-tbody tr {
-  border-bottom: 1px solid var(--border);
-  transition: background .15s;
-  cursor: pointer;
-}
-tbody tr:last-child { border-bottom: none; }
-tbody tr:hover { background: rgba(255,255,255,.03); }
-tbody tr.top-priority { background: rgba(239,68,68,.06); }
-tbody td { padding: 12px 16px; color: var(--text); }
+/* ── Score display ── */
+.sdisplay{padding:16px;border-radius:var(--rs);background:var(--bg);border:1px solid var(--border);text-align:center}
+.snum{font-family:var(--mono);font-size:48px;font-weight:700;line-height:1;letter-spacing:-.06em}
+.sbar{height:9px;border-radius:99px;background:var(--bg2);overflow:hidden;margin:10px 0 8px}
+.sbf{height:100%;border-radius:99px;transition:width .5s ease}
 
-/* ─── BADGES ─────────────────────────────────────────────── */
-.badge {
-  display: inline-block;
-  padding: 2px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 500;
-}
-.badge-low      { background: var(--low-bg);      color: var(--low);      border: 1px solid rgba(34,197,94,.25); }
-.badge-moderate { background: var(--moderate-bg); color: var(--moderate); border: 1px solid rgba(250,204,21,.25); }
-.badge-high     { background: var(--high-bg);     color: var(--high);     border: 1px solid rgba(249,115,22,.25); }
-.badge-critical { background: var(--critical-bg); color: var(--critical); border: 1px solid rgba(239,68,68,.25); }
+/* ── Alert items ── */
+.al{display:flex;flex-direction:column;gap:7px}
+.ai{padding:10px 13px;border-radius:var(--rx);border:1px solid;font-size:12.5px;line-height:1.5}
+.ai.safe{background:var(--safe-bg);border-color:var(--safe-bd);color:var(--safe)}
+.ai.low{background:var(--low-bg);border-color:var(--low-bd);color:var(--low)}
+.ai.mod{background:var(--mod-bg);border-color:var(--mod-bd);color:var(--mod)}
+.ai.high{background:var(--high-bg);border-color:var(--high-bd);color:var(--high)}
+.ai.crit{background:var(--crit-bg);border-color:var(--crit-bd);color:var(--crit)}
+.ai-name{font-weight:800;margin-bottom:2px}
+.ai-copy{color:var(--text2);font-size:11px;margin-top:2px}
 
-/* ─── PRIORITY BANNER ────────────────────────────────────── */
-.priority-banner {
-  background: linear-gradient(135deg, rgba(239,68,68,.15), rgba(249,115,22,.1));
-  border: 1px solid rgba(239,68,68,.3);
-  border-radius: var(--radius);
-  padding: 16px 20px;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-.priority-icon { font-size: 28px; }
-.priority-label { font-size: 11px; color: var(--muted); letter-spacing: .5px; text-transform: uppercase; }
-.priority-name {
-  font-family: var(--font-display);
-  font-size: 18px;
-  font-weight: 700;
-  color: #fff;
-}
-.priority-ri { color: var(--critical); font-size: 13px; font-weight: 500; }
+/* ── Treatment buttons ── */
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tbtn{padding:12px 10px;border-radius:var(--rs);border:1px solid var(--border);background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;
+  transition:all .18s;font-family:var(--font);position:relative;overflow:hidden}
+.tbtn:hover{border-color:var(--accent);background:var(--accent-soft);transform:translateY(-2px);box-shadow:var(--sh)}
+.tbtn.applied{border-color:var(--safe);background:var(--safe-bg);animation:flash .6s ease}
+@keyframes flash{0%,100%{opacity:1}50%{opacity:.6}}
+.ticon{font-size:20px;line-height:1}
+.tname{font-size:11.5px;font-weight:800;color:var(--text);text-align:center;line-height:1.3}
+.tresult{font-size:10px;font-weight:700;color:var(--safe);text-align:center;min-height:14px}
 
-/* ─── MONITORING PANEL ───────────────────────────────────── */
-.monitor-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-bottom: 20px;
-}
-.factor-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px;
-}
-.factor-label { color: var(--muted); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
-.factor-val {
-  font-family: var(--font-display);
-  font-size: 26px;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 8px;
-}
-.factor-bar-track {
-  height: 5px;
-  background: var(--border);
-  border-radius: 3px;
-  overflow: hidden;
-}
-.factor-bar-fill {
-  height: 100%;
-  border-radius: 3px;
-  transition: width .6s ease;
-}
+/* ── Diagram ── */
+.diagram-wrap{display:flex;gap:16px;align-items:flex-start}
+.diagram-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px}
+.diagram-label{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.body-svg-wrap{position:relative;width:100%;max-width:200px}
+.bed-svg-wrap{position:relative;width:100%;max-width:200px}
 
-.ri-gauge {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 24px;
-  text-align: center;
-  margin-bottom: 20px;
-}
-.ri-num {
-  font-family: var(--font-display);
-  font-size: 64px;
-  font-weight: 800;
-  line-height: 1;
-  transition: color .4s;
-}
-.ri-caption { color: var(--muted); font-size: 12px; margin-top: 4px; }
-.ri-formula {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 12px;
-  font-style: italic;
-}
+/* ── Timeline ── */
+.tline{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.ti{padding:12px;border:1px solid var(--border);border-radius:var(--rs);background:var(--bg)}
+.tih{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.tiscore{font-family:var(--mono);font-size:18px;font-weight:700;line-height:1}
 
-/* ─── ALERTS BOX ─────────────────────────────────────────── */
-.alerts-box {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px;
-  margin-bottom: 20px;
-}
-.alerts-title {
-  font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 600;
-  color: #fff;
-  margin-bottom: 12px;
-}
-.alert-item {
-  padding: 10px 14px;
-  border-radius: var(--radius-sm);
-  margin-bottom: 8px;
-  font-size: 12px;
-  border-left: 3px solid;
-}
-.alert-item:last-child { margin-bottom: 0; }
-.alert-critical { background: var(--critical-bg); border-color: var(--critical); color: #fca5a5; }
-.alert-warning   { background: var(--high-bg);    border-color: var(--high);    color: #fed7aa; }
-.alert-info      { background: var(--moderate-bg);border-color: var(--moderate);color: #fef08a; }
-.alert-ok {
-  background: var(--low-bg);
-  border-color: var(--low);
-  color: #bbf7d0;
-}
+/* ── History ── */
+.hist-item{padding:12px 14px;border:1px solid var(--border);border-radius:var(--rs);background:var(--bg);display:flex;flex-direction:column;gap:3px}
+.hist-act{font-size:12.5px;font-weight:700}
+.hist-meta{display:flex;gap:10px;font-size:10.5px;color:var(--muted)}
+.hist-chg{font-size:11.5px;font-weight:800}
 
-/* ─── FORM ELEMENTS ──────────────────────────────────────── */
-.form-group { margin-bottom: 16px; }
-.form-label {
-  display: block;
-  font-size: 11px;
-  letter-spacing: .5px;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 6px;
-}
-.form-input, .form-select {
-  width: 100%;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text);
-  padding: 9px 12px;
-  font-family: var(--font-mono);
-  font-size: 13px;
-  transition: border-color .2s;
-}
-.form-input:focus, .form-select:focus {
-  outline: none;
-  border-color: var(--accent);
-}
-.form-select option { background: var(--surface); }
+/* ── Heatmap ── */
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:6px;background:var(--bg2);border-radius:var(--rs);border:1px solid var(--border2)}
+.sc{aspect-ratio:1;border-radius:5px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:10px;font-weight:700;color:rgba(255,255,255,.95);
+  cursor:pointer;transition:transform .15s,box-shadow .15s;position:relative}
+.sc:hover{transform:scale(1.1);box-shadow:0 4px 10px rgba(0,0,0,.25);z-index:5}
+.sc.inactive{opacity:.22;background:#b0bec5!important}
+.sc-tt{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
+  background:var(--text);color:var(--bg);padding:5px 9px;border-radius:5px;
+  font-size:10.5px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:10}
+.sc:hover .sc-tt{opacity:1}
 
-.slider-row { display: flex; align-items: center; gap: 12px; }
-input[type=range] {
-  flex: 1;
-  -webkit-appearance: none;
-  background: var(--border);
-  height: 4px;
-  border-radius: 2px;
-  cursor: pointer;
-}
-input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 14px; height: 14px;
-  background: var(--accent);
-  border-radius: 50%;
-  box-shadow: 0 0 8px var(--accent);
-}
-.slider-val {
-  min-width: 40px;
-  text-align: right;
-  color: var(--accent);
-  font-weight: 500;
-}
+/* ── Form ── */
+.fg{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.field{display:flex;flex-direction:column;gap:5px}
+.fl{font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+input[type=text],input[type=number],select,textarea{width:100%;padding:10px 12px;border:1px solid var(--border2);
+  border-radius:var(--rx);background:var(--surface);color:var(--text);font-size:13px;
+  transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(15,118,110,.1)}
+input[type=range]{width:100%;padding:0;border:none;background:transparent;box-shadow:none;accent-color:var(--accent)}
+.sg-wrap{padding:12px;border:1px solid var(--border);border-radius:var(--rx);background:var(--bg)}
+.sg-head{display:flex;justify-content:space-between;margin-bottom:6px;font-size:12.5px;font-weight:700}
+.sg-val{font-family:var(--mono);color:var(--accent);font-weight:700}
 
-/* ─── BUTTONS ────────────────────────────────────────────── */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 9px 18px;
-  border-radius: var(--radius-sm);
-  border: none;
-  cursor: pointer;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 500;
-  transition: all .2s;
-  letter-spacing: .3px;
-}
-.btn-primary {
-  background: var(--accent2);
-  color: #fff;
-}
-.btn-primary:hover { background: #0066ee; transform: translateY(-1px); }
-.btn-outline {
-  background: transparent;
-  border: 1px solid var(--border2);
-  color: var(--text);
-}
-.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
-.btn-danger {
-  background: rgba(239,68,68,.15);
-  border: 1px solid rgba(239,68,68,.3);
-  color: var(--critical);
-}
-.btn-danger:hover { background: rgba(239,68,68,.25); }
-.btn-sm { padding: 6px 12px; font-size: 11px; }
+/* ── Braden grid ── */
+.bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.bi{padding:9px 11px;border:1px solid var(--border);border-radius:var(--rx);background:var(--bg)}
+.bin{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:3px}
+.biv{font-family:var(--mono);font-size:15px;font-weight:700}
 
-/* ─── SYSTEM HEALTH ──────────────────────────────────────── */
-.health-grid {
-  display: grid;
-  grid-template-columns: repeat(2,1fr);
-  gap: 14px;
-  margin-bottom: 20px;
-}
-.health-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-.health-icon { font-size: 28px; }
-.health-name {
-  font-size: 12px;
-  color: var(--muted);
-  margin-bottom: 4px;
-  text-transform: uppercase;
-  letter-spacing: .5px;
-}
-.health-status {
-  font-family: var(--font-display);
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--low);
-}
-.health-status.offline { color: var(--critical); }
+/* ── Health page ── */
+.hgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.hitem{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;
+  border-radius:var(--rx);background:var(--bg);border:1px solid var(--border)}
+.hkey{font-size:12px;font-weight:700;color:var(--text2)}
+.hval{font-family:var(--mono);font-size:12px;font-weight:700}
 
-.formula-box {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px;
-  margin-bottom: 20px;
-}
-.formula-title {
-  font-family: var(--font-display);
-  font-size: 14px;
-  font-weight: 600;
-  color: #fff;
-  margin-bottom: 14px;
-}
-.formula-eq {
-  font-size: 18px;
-  text-align: center;
-  color: var(--accent);
-  padding: 16px;
-  background: rgba(0,200,255,.06);
-  border-radius: var(--radius-sm);
-  border: 1px solid rgba(0,200,255,.15);
-  margin-bottom: 14px;
-  letter-spacing: .5px;
-}
-.formula-vars { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.formula-var {
-  font-size: 12px;
-  color: var(--muted);
-  padding: 8px 12px;
-  background: rgba(255,255,255,.02);
-  border-radius: var(--radius-sm);
-}
-.formula-var b { color: var(--text); }
+/* ── AI insight panel ── */
+.ai-panel{background:linear-gradient(135deg,rgba(79,70,229,.08),rgba(124,58,237,.06));
+  border:1px solid rgba(124,58,237,.2);border-radius:var(--rs);padding:14px;margin-top:12px}
+.ai-panel-title{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+  color:#6d28d9;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.ai-rec{padding:8px 12px;border-radius:var(--rx);margin-bottom:6px;font-size:12.5px;font-weight:600;border:1px solid}
+.ai-rec.High{background:var(--crit-bg);border-color:var(--crit-bd);color:var(--crit)}
+.ai-rec.Medium{background:var(--mod-bg);border-color:var(--mod-bd);color:var(--mod)}
+.ai-rec.Routine,.ai-rec.Low{background:var(--safe-bg);border-color:var(--safe-bd);color:var(--safe)}
+.ai-loading{color:var(--muted);font-size:12px;font-style:italic;padding:8px}
 
-/* patient select in monitoring */
-.patient-select-row {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  align-items: center;
-}
-.patient-select-row .form-select { max-width: 280px; }
+/* ── Modal ── */
+.moverlay{position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:200;
+  display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
+.moverlay[hidden]{display:none}
+.modal{background:var(--surface);border-radius:var(--r);max-width:800px;width:100%;
+  max-height:92vh;overflow-y:auto;box-shadow:var(--sh-lg);padding:24px}
+.mh{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;gap:14px}
+.mc-btn{width:30px;height:30px;border-radius:7px;border:1px solid var(--border);
+  background:var(--bg);color:var(--text2);font-size:17px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mc-btn:hover{background:var(--crit-bg);color:var(--crit)}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 
-/* onboarding success msg */
-.success-msg {
-  display: none;
-  padding: 12px 16px;
-  background: var(--low-bg);
-  border: 1px solid rgba(34,197,94,.3);
-  border-radius: var(--radius-sm);
-  color: var(--low);
-  font-size: 12px;
-  margin-top: 12px;
-}
+/* ── Empty state ── */
+.empty{padding:32px;border:2px dashed var(--border);border-radius:var(--r);text-align:center;color:var(--muted)}
+.empty-ico{font-size:30px;margin-bottom:10px}
+.empty-txt{font-size:13px;font-weight:600}
 
-/* auto-update ticker */
-.update-ticker {
-  font-size: 11px;
-  color: var(--muted);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.spinner {
-  width: 10px; height: 10px;
-  border: 2px solid var(--border2);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin .8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
+/* ── Toast ── */
+#toast{position:fixed;bottom:20px;right:20px;background:var(--text);color:var(--bg);
+  padding:12px 18px;border-radius:var(--rx);font-size:13px;font-weight:700;
+  box-shadow:var(--sh-lg);z-index:999;transform:translateY(18px);opacity:0;transition:all .25s;max-width:320px}
+#toast.show{transform:translateY(0);opacity:1}
 
-/* rank badge */
-.rank { color: var(--accent); font-weight: 600; }
-.rank-1 { color: var(--critical); }
+/* ── Hindi lang support ── */
+[data-lang="en"] .hi{display:none}
+[data-lang="hi"] .en{display:none}
+[data-lang="both"] .hi,[data-lang="both"] .en{display:inline}
 
-/* responsive tweaks */
-@media (max-width: 900px) {
-  .shell { grid-template-columns: 1fr; }
-  .sidebar { display: none; }
-  .grid-3 { grid-template-columns: 1fr 1fr; }
-}
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+/* ── Responsive ── */
+@media(max-width:1200px){.stats-row{grid-template-columns:repeat(2,1fr)}.g6{grid-template-columns:repeat(3,1fr)}.dash-grid{grid-template-columns:1fr}}
+@media(max-width:900px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.g2,.g3{grid-template-columns:1fr}.priority-banner{grid-template-columns:1fr}.stats-row{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
-
 <div class="shell">
 
-  <!-- ── TOPBAR ──────────────────────────────────────── -->
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brand-icon">🏥</div>
+    <div>
+      <div class="brand-name">CareGuard</div>
+      <div class="brand-sub">HAPU Prevention v3.0</div>
+    </div>
+  </div>
+
+  <div class="nav-sep"><span class="en">Navigation</span><span class="hi">नेविगेशन</span></div>
+  <button class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
+    <span class="ico">📊</span><span class="en">Dashboard</span><span class="hi">डैशबोर्ड</span>
+    <span class="nbadge" id="navBadge" style="display:none">!</span>
+  </button>
+  <button class="nav-item" data-page="monitoring" onclick="showPage('monitoring')">
+    <span class="ico">🔍</span><span class="en">Monitoring</span><span class="hi">निगरानी</span>
+  </button>
+  <button class="nav-item" data-page="heatmap" onclick="showPage('heatmap')">
+    <span class="ico">🌡️</span><span class="en">Pressure Map</span><span class="hi">दबाव मानचित्र</span>
+  </button>
+  <button class="nav-item" data-page="add" onclick="showPage('add')">
+    <span class="ico">➕</span><span class="en">Add Patient</span><span class="hi">मरीज़ जोड़ें</span>
+  </button>
+  <button class="nav-item" data-page="health" onclick="showPage('health')">
+    <span class="ico">⚡</span><span class="en">System Health</span><span class="hi">सिस्टम स्थिति</span>
+  </button>
+
+  <div class="sb-card" style="margin-top:14px">
+    <div class="sb-title" style="color:var(--crit)"><span class="en">⚠ Attend First</span><span class="hi">⚠ पहले देखें</span></div>
+    <div id="sbPriorityName" style="font-size:16px;font-weight:800;margin-bottom:4px;color:var(--text)">Loading…</div>
+    <div id="sbPriorityDesc" style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.4"></div>
+    <button onclick="goMonitorFromSidebar()" style="width:100%;padding:7px;background:var(--crit-bg);color:var(--crit);border:1px solid var(--crit-bd);border-radius:var(--rx);font-size:11px;font-weight:800;cursor:pointer">Action Required →</button>
+  </div>
+
+  <div class="sb-card" style="margin-top:4px">
+    <div class="sb-title"><span class="en">Risk Scale</span><span class="hi">जोखिम स्तर</span></div>
+    <div class="rl-item"><div class="rl-dot" style="background:var(--safe)"></div><span class="en">0–1 Safe</span><span class="hi">0–1 सुरक्षित</span></div>
+    <div class="rl-item"><div class="rl-dot" style="background:var(--low)"></div><span class="en">1–2 Low Risk</span><span class="hi">1–2 कम</span></div>
+    <div class="rl-item"><div class="rl-dot" style="background:var(--mod)"></div><span class="en">2–3 Moderate</span><span class="hi">2–3 मध्यम</span></div>
+    <div class="rl-item"><div class="rl-dot" style="background:var(--high)"></div><span class="en">3–4 High Risk</span><span class="hi">3–4 अधिक</span></div>
+    <div class="rl-item"><div class="rl-dot" style="background:var(--crit)"></div><span class="en">4–5 Critical</span><span class="hi">4–5 गंभीर</span></div>
+    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:11px;color:var(--muted)">
+      Formula: <span style="font-family:var(--mono);font-size:11px;color:var(--accent)">B×P×T×M×H</span>
+    </div>
+  </div>
+
+  <div class="sb-card" style="margin-top:4px">
+    <div class="sb-title"><span class="en">Simulation</span><span class="hi">सिमुलेशन</span></div>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-ghost btn-sm" style="flex:1;font-size:11px" onclick="simulateUpdate()"><span class="en">Static</span><span class="hi">स्थिर</span></button>
+      <button class="btn btn-primary btn-sm" style="flex:1;font-size:11px" onclick="simulateUpdate()"><span class="en">Dynamic</span><span class="hi">गतिशील</span></button>
+    </div>
+  </div>
+
+  <div class="sidebar-foot">
+    <div id="clockDisplay" style="font-family:var(--mono);font-size:13px;color:var(--text2);margin-bottom:2px"></div>
+    CareGuard v3.0 · HAPU-free India
+  </div>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
   <header class="topbar">
-    <div class="topbar-logo">⚕️ Care<span>Guard</span></div>
-    <div class="topbar-pill">AI CLINICAL SUPPORT</div>
-    <div class="topbar-right">
-      <div class="update-ticker">
-        <div class="spinner" id="spinnerIcon"></div>
-        <span id="updateLabel">Auto-updating…</span>
+    <div class="tl">
+      <div>
+        <div class="page-title" id="pageTitleBar"><span class="en">Ward Overview</span><span class="hi">वार्ड अवलोकन</span></div>
+        <div class="page-sub"><span class="en">Hospital-Acquired Pressure Ulcer Prevention</span><span class="hi">दबाव अल्सर रोकथाम</span></div>
       </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <div class="status-dot"></div>
-        <span id="backendStatus">Connecting…</span>
+    </div>
+    <div class="tr">
+      <div class="sbadge idle" id="sysStatusBadge"><span class="dot"></span><span id="sysStatusText">Connecting…</span></div>
+      <div class="mode-tabs">
+        <button class="mode-tab active" id="modeSimple" onclick="setMode('simple')"><span class="en">Simple</span><span class="hi">सरल</span></button>
+        <button class="mode-tab" id="modeAdvanced" onclick="setMode('advanced')"><span class="en">Advanced</span><span class="hi">विस्तृत</span></button>
       </div>
+      <button class="ib" onclick="cycleLang()"><span id="langLabel">हिं/EN</span></button>
+      <button class="ib" onclick="toggleTheme()" id="themeBtn">🌙</button>
+      <button class="btn btn-ghost btn-sm" onclick="refreshAll()">↻ <span class="en">Refresh</span><span class="hi">ताज़ा</span></button>
     </div>
   </header>
 
-  <!-- ── SIDEBAR ─────────────────────────────────────── -->
-  <nav class="sidebar">
-    <div class="sidebar-section">Navigation</div>
-    <div class="nav-item active" data-page="dashboard">
-      <span class="nav-icon">📊</span> Dashboard
-    </div>
-    <div class="nav-item" data-page="monitoring">
-      <span class="nav-icon">🔬</span> Monitoring
-    </div>
-    <div class="nav-item" data-page="onboarding">
-      <span class="nav-icon">➕</span> Add Patient
-    </div>
-    <div class="nav-item" data-page="health">
-      <span class="nav-icon">🛡️</span> System Health
-    </div>
-  </nav>
+  <div class="content">
 
-  <!-- ── MAIN ────────────────────────────────────────── -->
-  <main class="main">
-
-    <!-- ══════════════════════════════════════════════════
-         PAGE 1: DASHBOARD
-    ══════════════════════════════════════════════════ -->
-    <div class="page active" id="page-dashboard">
-
-      <div class="page-header">
-        <div class="page-title">Patient Dashboard</div>
-        <div class="page-subtitle">Real-time risk index monitoring across all patients</div>
-      </div>
-
-      <!-- Summary stats -->
-      <div class="grid-3">
-        <div class="stat-card">
-          <div class="stat-label">Total Patients</div>
-          <div class="stat-value" id="statTotal">—</div>
-          <div class="stat-sub">Currently monitored</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">High Risk</div>
-          <div class="stat-value" id="statHigh" style="color:var(--high)">—</div>
-          <div class="stat-sub">RI ≥ 25</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Critical</div>
-          <div class="stat-value" id="statCrit" style="color:var(--critical)">—</div>
-          <div class="stat-sub">RI ≥ 50 — immediate action</div>
-        </div>
+    <!-- ═══ DASHBOARD ═══ -->
+    <section class="page active" id="page-dashboard">
+      <!-- Stats row -->
+      <div class="stats-row">
+        <div class="scard"><div class="sl"><span class="en">Total Patients</span><span class="hi">कुल मरीज़</span></div><div class="sv" id="statTotal">0</div><div class="sn"><span class="en">Active in ward</span><span class="hi">वार्ड में सक्रिय</span></div></div>
+        <div class="scard"><div class="sl"><span class="en">High Risk</span><span class="hi">अधिक जोखिम</span></div><div class="sv high" id="statHigh">0</div><div class="sn"><span class="en">Score ≥ 3.0</span><span class="hi">स्कोर ≥ 3.0</span></div></div>
+        <div class="scard"><div class="sl"><span class="en">Critical</span><span class="hi">गंभीर</span></div><div class="sv crit" id="statCritical">0</div><div class="sn"><span class="en">Immediate action</span><span class="hi">तत्काल देखभाल</span></div></div>
+        <div class="scard"><div class="sl"><span class="en">Avg Risk Score</span><span class="hi">औसत जोखिम</span></div><div class="sv" id="statAvg">0</div><div class="sn"><span class="en">Ward average</span><span class="hi">वार्ड औसत</span></div></div>
       </div>
 
       <!-- Priority banner -->
       <div class="priority-banner" id="priorityBanner">
-        <div class="priority-icon">🚨</div>
+        <div class="pf"><span class="en">⚠ Attend First</span><span class="hi">⚠ पहले देखें</span></div>
         <div>
-          <div class="priority-label">Top Priority</div>
-          <div class="priority-name" id="priorityName">Loading…</div>
-          <div class="priority-ri" id="priorityRI">Calculating risk index…</div>
+          <div class="pname" id="priorityName">Loading…</div>
+          <div class="pmeta" id="priorityMeta"></div>
+          <div class="padv" id="priorityAdvice"></div>
+        </div>
+        <div class="pside">
+          <div id="priorityChip"></div>
+          <div id="priorityPrediction" class="chip safe"></div>
+          <div class="btn-group">
+            <button class="btn btn-primary btn-sm" id="priorityOpenBtn"><span class="en">Details</span><span class="hi">विवरण</span></button>
+            <button class="btn btn-secondary btn-sm" id="priorityMonitorBtn"><span class="en">Monitor</span><span class="hi">निगरानी</span></button>
+            <button class="btn btn-success btn-sm" id="priorityRepositionBtn"><span class="en">↩ Reposition</span><span class="hi">↩ स्थिति बदलें</span></button>
+          </div>
         </div>
       </div>
 
-      <!-- Patient table -->
-      <div class="table-wrap">
-        <div class="table-header">
-          <div class="table-title">All Patients — Sorted by Risk Priority</div>
-          <div class="table-actions">
-<select id="modeToggle" onchange="switchMode()" style="padding:6px;background:#111;color:#fff;border:1px solid #333;border-radius:6px">
-  <option value="static">Static Demo</option>
-  <option value="dynamic">Dynamic Demo</option>
-</select>
-
-            <button class="btn btn-outline btn-sm" onclick="loadPatients()">↻ Refresh</button>
-            
-<button class="btn btn-outline btn-sm" onclick="runSimulation()">▶ Simulate</button>
-<button class="btn btn-outline btn-sm" onclick="toggleAutoSim()" id="autoBtn">⚡ Auto Sim OFF</button>
-
+      <!-- Patient table + alerts/actions -->
+      <div class="g2">
+        <div class="card" style="padding:0">
+          <div style="padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div class="ct"><span class="en">Patient Priority List</span><span class="hi">मरीज़ प्राथमिकता</span></div>
+              <div class="cs"><span class="en">Sorted by composite risk score (B×P×T×M×H)</span><span class="hi">जोखिम स्कोर के अनुसार</span></div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="simulateUpdate()"><span class="en">↻ Simulate</span><span class="hi">↻ सिमुलेट</span></button>
+          </div>
+          <div class="tw" style="border:none;border-radius:0">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th><span class="en">Patient</span><span class="hi">मरीज़</span></th>
+                  <th><span class="en">Risk Level</span><span class="hi">जोखिम</span></th>
+                  <th><span class="en">Score</span><span class="hi">स्कोर</span><span class="formula">B×P×T×M×H</span></th>
+                  <th><span class="en">Braden</span><span class="hi">ब्रेडन</span><span class="formula">Scale 6–23</span></th>
+                  <th><span class="en">Pressure</span><span class="hi">दबाव</span></th>
+                  <th><span class="en">Immobile</span><span class="hi">समय</span></th>
+                  <th><span class="en">Action</span><span class="hi">कार्य</span></th>
+                </tr>
+              </thead>
+              <tbody id="patientTableBody">
+                <tr><td colspan="8" style="padding:24px;text-align:center;color:var(--muted)">Loading patients…</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Patient</th>
-              <th>Condition</th>
-              <th>Pressure</th>
-              <th>Time (min)</th>
-              <th>RI Score</th>
-              <th>Risk Level</th>
-              <th>Alerts</th>
-            </tr>
-          </thead>
-          <tbody id="patientTable">
-            <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">Loading patients…</td></tr>
-          </tbody>
-        </table>
-      </div>
 
-    </div><!-- /dashboard -->
-
-
-    <!-- ══════════════════════════════════════════════════
-         PAGE 2: MONITORING
-    ══════════════════════════════════════════════════ -->
-    <div class="page" id="page-monitoring">
-
-      <div class="page-header">
-        <div class="page-title">Patient Monitoring</div>
-        <div class="page-subtitle">Detailed risk factor breakdown per patient</div>
-      </div>
-
-      <div class="patient-select-row">
-        <select class="form-select" id="monitorSelect" onchange="loadMonitorData()">
-          <option value="">— Select a patient —</option>
-        </select>
-        <button class="btn btn-outline btn-sm" onclick="loadMonitorData()">↻ Refresh</button>
-      </div>
-
-      <!-- RI Gauge -->
-      <div class="ri-gauge">
-        <div class="ri-num" id="monRI">—</div>
-        <div class="ri-caption">Risk Index (RI)</div>
-        <div id="monRisk" style="margin-top:8px">—</div>
-        <div class="ri-formula">RI = (P / 32) × T × F<sub>mo</sub> × F<sub>sh</sub> + S</div>
-      </div>
-
-      <!-- Factor cards -->
-      <div class="monitor-grid">
-
-        <div class="factor-card">
-          <div class="factor-label">Pressure (P)</div>
-          <div class="factor-val" id="monP">—</div>
-          <div class="factor-bar-track">
-            <div class="factor-bar-fill" id="monPBar" style="width:0%;background:var(--critical)"></div>
+        <div class="grow">
+          <div class="card">
+            <div class="ch"><div class="ct"><span class="en">Ward Alerts</span><span class="hi">वार्ड अलर्ट</span></div></div>
+            <div class="al" id="wardAlerts">
+              <div class="ai safe"><div class="ai-name"><span class="en">No alerts</span><span class="hi">कोई अलर्ट नहीं</span></div></div>
+            </div>
           </div>
-          <div style="color:var(--muted);font-size:11px;margin-top:6px">mmHg / max 120</div>
-        </div>
-
-        <div class="factor-card">
-          <div class="factor-label">Time Immobile (T)</div>
-          <div class="factor-val" id="monT">—</div>
-          <div class="factor-bar-track">
-            <div class="factor-bar-fill" id="monTBar" style="width:0%;background:var(--moderate)"></div>
-          </div>
-          <div style="color:var(--muted);font-size:11px;margin-top:6px">Minutes / risk multiplier</div>
-        </div>
-
-        <div class="factor-card">
-          <div class="factor-label">Moisture Factor (F<sub>mo</sub>)</div>
-          <div class="factor-val" id="monFmo">—</div>
-          <div class="factor-bar-track">
-            <div class="factor-bar-fill" id="monFmoBar" style="width:0%;background:var(--accent)"></div>
-          </div>
-          <div style="color:var(--muted);font-size:11px;margin-top:6px">RH × Temp multiplier</div>
-        </div>
-
-        <div class="factor-card">
-          <div class="factor-label">Shear Factor (F<sub>sh</sub>)</div>
-          <div class="factor-val" id="monFsh">—</div>
-          <div class="factor-bar-track">
-            <div class="factor-bar-fill" id="monFshBar" style="width:0%;background:var(--high)"></div>
-          </div>
-          <div style="color:var(--muted);font-size:11px;margin-top:6px">Bed angle incline</div>
-        </div>
-
-        <div class="factor-card">
-          <div class="factor-label">Systemic Score (S)</div>
-          <div class="factor-val" id="monS">—</div>
-          <div class="factor-bar-track">
-            <div class="factor-bar-fill" id="monSBar" style="width:0%;background:var(--low)"></div>
-          </div>
-          <div style="color:var(--muted);font-size:11px;margin-top:6px">Medical condition weight</div>
-        </div>
-
-        <div class="factor-card">
-          <div class="factor-label">Bed Angle</div>
-          <div class="factor-val" id="monAngle">—</div>
-          <div class="factor-bar-track">
-            <div class="factor-bar-fill" id="monAngleBar" style="width:0%;background:var(--accent2)"></div>
-          </div>
-          <div style="color:var(--muted);font-size:11px;margin-top:6px">Degrees from horizontal</div>
-        </div>
-
-      </div>
-
-      <!-- Alerts -->
-      <div class="alerts-box">
-        <div class="alerts-title">⚠️ Smart Alerts</div>
-        <div id="monAlerts">
-          <div class="alert-item alert-ok">✓ Select a patient to view alerts</div>
-        </div>
-      </div>
-
-    </div><!-- /monitoring -->
-
-
-    <!-- ══════════════════════════════════════════════════
-         PAGE 3: ONBOARDING
-    ══════════════════════════════════════════════════ -->
-    <div class="page" id="page-onboarding">
-
-      <div class="page-header">
-        <div class="page-title">Add New Patient</div>
-        <div class="page-subtitle">Onboard a patient into the monitoring system</div>
-      </div>
-
-      <div class="grid-2">
-
-        <div class="table-wrap" style="padding:24px">
-          <div class="table-title" style="margin-bottom:20px">Patient Details</div>
-
-          <div class="form-group">
-            <label class="form-label">Full Name</label>
-            <input class="form-input" id="newName" placeholder="e.g. Ravi Kumar" />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Medical Condition</label>
-            <select class="form-select" id="newCondition">
-              <option value="Normal">Normal (S = 0)</option>
-              <option value="Diabetes">Diabetes (S = +2.0)</option>
-              <option value="Stroke">Stroke (S = +2.5)</option>
-              <option value="ICU Ventilated">ICU Ventilated (S = +2.5)</option>
-              <option value="Coma">Coma (S = +3.0)</option>
+          <div class="card">
+            <div class="ch"><div class="ct"><span class="en">Quick Actions</span><span class="hi">त्वरित कार्य</span></div></div>
+            <select id="quickPatientDropdown" onchange="selectQuickPatient(this.value)" style="width:100%;margin-bottom:10px">
+              <option value=""><span class="en">-- Select Patient --</span></option>
             </select>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Initial Pressure (mmHg) — <span id="lPressure">60</span></label>
-            <div class="slider-row">
-              <input type="range" min="20" max="120" value="60" id="newPressure"
-                     oninput="document.getElementById('lPressure').textContent=this.value" />
-              <span class="slider-val" id="lPressureV">60</span>
+            <div class="tgrid">
+              <button class="tbtn" id="qt-reposition" onclick="doTreatment('reposition')">
+                <span class="ticon">🔄</span>
+                <span class="tname en">Reposition</span><span class="tname hi">स्थिति बदलें</span>
+                <span class="tresult" id="qtr-reposition"></span>
+              </button>
+              <button class="tbtn" id="qt-bedsheet" onclick="doTreatment('bedsheet_change')">
+                <span class="ticon">🛏️</span>
+                <span class="tname en">Bedsheet</span><span class="tname hi">चादर बदलें</span>
+                <span class="tresult" id="qtr-bedsheet"></span>
+              </button>
+              <button class="tbtn" id="qt-moisture" onclick="doTreatment('moisture_care')">
+                <span class="ticon">💧</span>
+                <span class="tname en">Moisture</span><span class="tname hi">नमी देखभाल</span>
+                <span class="tresult" id="qtr-moisture"></span>
+              </button>
+              <button class="tbtn" id="qt-offload" onclick="doTreatment('pressure_offload')">
+                <span class="ticon">🩹</span>
+                <span class="tname en">Offload</span><span class="tname hi">दबाव कम</span>
+                <span class="tresult" id="qtr-offload"></span>
+              </button>
+              <button class="tbtn" id="qt-nutrition" onclick="doTreatment('nutrition')">
+                <span class="ticon">🥗</span>
+                <span class="tname en">Nutrition</span><span class="tname hi">पोषण</span>
+                <span class="tresult" id="qtr-nutrition"></span>
+              </button>
+              <button class="tbtn" onclick="openDetailsForQuick()">
+                <span class="ticon">📋</span>
+                <span class="tname en">Details</span><span class="tname hi">विवरण</span>
+                <span class="tresult"></span>
+              </button>
             </div>
           </div>
-
-          <div class="form-group">
-            <label class="form-label">Time Immobile (min) — <span id="lTime">120</span></label>
-            <div class="slider-row">
-              <input type="range" min="0" max="600" value="120" id="newTime"
-                     oninput="document.getElementById('lTime').textContent=this.value" />
-              <span class="slider-val" id="lTimeV">120</span>
+          <div class="card">
+            <div class="sb-title" style="color:var(--accent);letter-spacing:.1em">
+              <span class="en">Ward Burden Score</span><span class="hi">वार्ड भार स्कोर</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:12px;font-weight:800;font-size:14px">
+              <span><span class="en">Current burden</span><span class="hi">वर्तमान भार</span></span>
+              <span class="mono" id="wardBurdenTotal">0</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-weight:800;font-size:14px;color:var(--safe)">
+              <span><span class="en">With intervention (−20%)</span><span class="hi">हस्तक्षेप के बाद</span></span>
+              <span class="mono" id="wardBurdenReduced">0</span>
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.5">
+              <span class="en">20% risk reduction via early repositioning, moisture control, pressure offloading.</span>
+              <span class="hi">समय पर स्थिति बदलने और देखभाल से 20% जोखिम कम होता है।</span>
             </div>
           </div>
-
-          <div class="form-group">
-            <label class="form-label">Relative Humidity % — <span id="lRH">65</span></label>
-            <div class="slider-row">
-              <input type="range" min="30" max="100" value="65" id="newRH"
-                     oninput="document.getElementById('lRH').textContent=this.value" />
-              <span class="slider-val" id="lRHV">65</span>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Skin Temperature (°C) — <span id="lTemp">36.0</span></label>
-            <div class="slider-row">
-              <input type="range" min="30" max="40" step="0.1" value="36" id="newTemp"
-                     oninput="document.getElementById('lTemp').textContent=parseFloat(this.value).toFixed(1)" />
-              <span class="slider-val" id="lTempV">36.0</span>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Bed Angle (°) — <span id="lAngle">15</span></label>
-            <div class="slider-row">
-              <input type="range" min="0" max="80" value="15" id="newAngle"
-                     oninput="document.getElementById('lAngle').textContent=this.value" />
-              <span class="slider-val" id="lAngleV">15</span>
-            </div>
-          </div>
-
-          <button class="btn btn-primary" onclick="addPatient()" style="width:100%;justify-content:center;margin-top:8px">
-            ➕ Add to Monitoring System
-          </button>
-
-          <div class="success-msg" id="addSuccess"></div>
         </div>
+      </div>
+    </section>
 
-        <!-- Right: live RI preview -->
+    <!-- ═══ MONITORING ═══ -->
+    <section class="page" id="page-monitoring">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
         <div>
-          <div class="ri-gauge">
-            <div class="ri-num" id="previewRI">—</div>
-            <div class="ri-caption">Live RI Preview</div>
-            <div id="previewRisk" style="margin-top:8px">—</div>
-            <div class="ri-formula">Calculated as you adjust sliders</div>
+          <div style="font-size:22px;font-weight:800;letter-spacing:-.03em"><span class="en">Patient Monitoring</span><span class="hi">मरीज़ निगरानी</span></div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px"><span class="en">Detailed risk breakdown, body pressure diagram, treatment controls</span><span class="hi">जोखिम विश्लेषण और उपचार नियंत्रण</span></div>
+        </div>
+        <div class="btn-group">
+          <select id="monitorSelect" onchange="selectMonitorPatient(this.value)" style="padding:9px 12px;border:1px solid var(--border2);border-radius:var(--rx);background:var(--surface);color:var(--text);font-size:13px;min-width:200px">
+            <option value="">-- Select Patient --</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" onclick="refreshAll()">↻ <span class="en">Refresh</span><span class="hi">ताज़ा</span></button>
+        </div>
+      </div>
+
+      <div id="monitorEmpty" class="empty">
+        <div class="empty-ico">👤</div>
+        <div class="empty-txt"><span class="en">Select a patient to begin monitoring</span><span class="hi">निगरानी शुरू करने के लिए मरीज़ चुनें</span></div>
+      </div>
+
+      <div id="monitorPanel" style="display:none;flex-direction:column;gap:16px">
+        <!-- Top 3 score cards -->
+        <div class="g3">
+          <div class="card" style="text-align:center">
+            <div class="ml"><span class="en">Risk Score (0–5)</span><span class="hi">जोखिम स्कोर</span></div>
+            <div class="sdisplay">
+              <div class="snum" id="monRiskScore">0</div>
+              <div class="sbar"><div class="sbf" id="monRiskBar" style="width:0%"></div></div>
+              <div id="monRiskChip"></div>
+            </div>
           </div>
-          <div class="alerts-box">
-            <div class="alerts-title">⚠️ Predicted Alerts</div>
-            <div id="previewAlerts">
-              <div class="alert-item alert-ok">Adjust sliders to preview alerts</div>
+          <div class="card" style="text-align:center">
+            <div class="ml"><span class="en">Braden Scale (6–23)</span><span class="hi">ब्रेडन स्केल</span></div>
+            <div class="sdisplay">
+              <div class="snum" id="monBradenScore">0</div>
+              <!-- FIXED: Braden bar maps 6-23 to 0-100%; inverted so low Braden = full bar (high risk) -->
+              <div class="sbar"><div class="sbf" id="monBradenBar" style="width:0%"></div></div>
+              <div id="monBradenLabel" style="font-size:11.5px;font-weight:700;color:var(--text2);margin-top:4px"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="ml"><span class="en">Predicted Risk (+2h)</span><span class="hi">अनुमानित जोखिम</span></div>
+            <div style="padding:10px;border-radius:var(--rx);background:var(--bg);margin-top:4px">
+              <div id="monPredicted" style="font-family:var(--mono);font-size:28px;font-weight:700">—</div>
+              <div id="monPredictedText" style="font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.5"></div>
+            </div>
+            <div class="ml" style="margin-top:10px"><span class="en">Hotspot Region</span><span class="hi">उच्च दबाव क्षेत्र</span></div>
+            <div id="monHotspot" style="font-weight:800;font-size:13px;color:var(--high)"></div>
+          </div>
+        </div>
+
+        <!-- 6 Metrics -->
+        <div class="g6" id="monMetrics"></div>
+
+        <!-- Risk breakdown + Treatment -->
+        <div class="g2">
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div class="card">
+              <div class="ch">
+                <div>
+                  <div class="ct"><span class="en">Risk Factor Breakdown</span><span class="hi">जोखिम कारक विश्लेषण</span></div>
+                  <div class="cs" id="monRiskExplain"></div>
+                </div>
+              </div>
+              <!-- FIXED: Formula display always visible -->
+              <div style="margin-bottom:10px;padding:10px 12px;background:var(--bg);border-radius:var(--rx);border:1px solid var(--border)">
+                <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px">Formula: Risk Score = softCap(B × P × T × M × H)</div>
+                <div id="formulaDisplay" style="font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:700">—</div>
+              </div>
+              <div id="factorList" style="display:flex;flex-direction:column;gap:7px"></div>
+              <div id="bradenBreakdown" class="advanced-only" style="margin-top:14px;display:none">
+                <div class="ct" style="margin-bottom:8px;font-size:12.5px"><span class="en">Braden Subscores</span><span class="hi">ब्रेडन उपस्कोर</span></div>
+                <div class="bgrid" id="bradenGrid"></div>
+              </div>
+            </div>
+            <!-- Pressure diagram -->
+            <div class="card">
+              <div class="ch">
+                <div>
+                  <div class="ct"><span class="en">Pressure Point Diagram</span><span class="hi">दबाव बिंदु चित्र</span></div>
+                  <div class="cs" id="diagramPostureLabel"></div>
+                </div>
+                <div id="diagramPostureChip" class="chip safe">Supine</div>
+              </div>
+              <div class="diagram-wrap" id="diagramWrap">
+                <div class="diagram-col">
+                  <div class="diagram-label"><span class="en">Body View</span><span class="hi">शरीर</span></div>
+                  <div class="body-svg-wrap" id="bodySvgWrap"></div>
+                </div>
+                <div class="diagram-col">
+                  <div class="diagram-label"><span class="en">Bed View</span><span class="hi">बिस्तर</span></div>
+                  <div class="bed-svg-wrap" id="bedSvgWrap"></div>
+                </div>
+                <div style="min-width:80px;font-size:10.5px">
+                  <div style="font-weight:800;margin-bottom:4px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)"><span class="en">Pressure</span><span class="hi">दबाव</span></div>
+                  <div style="height:80px;width:14px;border-radius:4px;background:linear-gradient(180deg,#7f1d1d,#ef4444,#f97316,#eab308,#22c55e);margin-bottom:3px"></div>
+                  <div style="font-size:10px;color:var(--muted)">High</div>
+                  <div style="font-size:10px;color:var(--muted);margin-top:50px">Low</div>
+                  <div id="ppLegend" style="margin-top:10px;display:flex;flex-direction:column;gap:4px"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Treatment + AI Insights -->
+          <div class="card">
+            <div class="ch">
+              <div>
+                <div class="ct"><span class="en">Treatment Actions</span><span class="hi">उपचार कार्य</span></div>
+                <div class="cs"><span class="en">Each action adjusts sensor values and recalculates risk immediately</span><span class="hi">प्रत्येक कार्य से जोखिम तुरंत अपडेट होता है</span></div>
+              </div>
+            </div>
+            <div class="tgrid">
+              <button class="tbtn" id="mt-reposition" onclick="treatSelected('reposition')">
+                <span class="ticon">🔄</span>
+                <span class="tname en">Reposition</span><span class="tname hi">स्थिति बदलें</span>
+                <span class="tresult" id="mtr-reposition"></span>
+              </button>
+              <button class="tbtn" id="mt-bedsheet" onclick="treatSelected('bedsheet_change')">
+                <span class="ticon">🛏️</span>
+                <span class="tname en">Bedsheet</span><span class="tname hi">चादर बदलें</span>
+                <span class="tresult" id="mtr-bedsheet"></span>
+              </button>
+              <button class="tbtn" id="mt-moisture" onclick="treatSelected('moisture_care')">
+                <span class="ticon">💧</span>
+                <span class="tname en">Moisture Care</span><span class="tname hi">नमी देखभाल</span>
+                <span class="tresult" id="mtr-moisture"></span>
+              </button>
+              <button class="tbtn" id="mt-offload" onclick="treatSelected('pressure_offload')">
+                <span class="ticon">🩹</span>
+                <span class="tname en">Offload</span><span class="tname hi">दबाव कम</span>
+                <span class="tresult" id="mtr-offload"></span>
+              </button>
+              <button class="tbtn" id="mt-nutrition" onclick="treatSelected('nutrition')">
+                <span class="ticon">🥗</span>
+                <span class="tname en">Nutrition</span><span class="tname hi">पोषण</span>
+                <span class="tresult" id="mtr-nutrition"></span>
+              </button>
+              <button class="tbtn" style="border-color:var(--high-bd)" onclick="confirmDeletePatient()">
+                <span class="ticon">🗑️</span>
+                <span class="tname en">Discharge</span><span class="tname hi">छुट्टी</span>
+              </button>
+            </div>
+            <div id="monTreatFeedback" style="margin-top:10px;padding:10px 12px;border-radius:var(--rx);background:var(--safe-bg);border:1px solid var(--safe-bd);color:var(--safe);font-size:12px;font-weight:700;display:none"></div>
+
+            <!-- AI Insights panel -->
+            <div style="margin-top:14px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#6d28d9">
+                  🤖 <span class="en">AI Clinical Insights</span><span class="hi">AI सलाह</span>
+                </div>
+                <button class="btn-ai" onclick="fetchAIInsights()">
+                  <span class="en">Analyze</span><span class="hi">विश्लेषण</span>
+                </button>
+              </div>
+              <div id="aiInsightPanel" style="font-size:12px;color:var(--muted);font-style:italic;padding:6px 0">
+                <span class="en">Click Analyze to get AI-powered clinical recommendations for this patient.</span>
+                <span class="hi">AI सलाह के लिए विश्लेषण बटन दबाएं।</span>
+              </div>
+            </div>
+
+            <div class="al" style="margin-top:12px" id="monAlerts"></div>
+          </div>
+        </div>
+
+        <!-- Timeline + History -->
+        <div class="g2">
+          <div class="card">
+            <div class="ch"><div class="ct"><span class="en">Future Risk Timeline</span><span class="hi">भविष्य जोखिम</span></div></div>
+            <div class="tline" id="predTimeline"></div>
+          </div>
+          <div class="card">
+            <div class="ch"><div class="ct"><span class="en">Care History</span><span class="hi">देखभाल इतिहास</span></div></div>
+            <div style="display:flex;flex-direction:column;gap:7px" id="historyList">
+              <div class="empty" style="padding:14px"><div class="empty-txt"><span class="en">No history yet</span><span class="hi">अभी कोई इतिहास नहीं</span></div></div>
             </div>
           </div>
         </div>
+      </div>
+    </section>
 
+    <!-- ═══ HEATMAP ═══ -->
+    <section class="page" id="page-heatmap">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <div style="font-size:22px;font-weight:800;letter-spacing:-.03em"><span class="en">Pressure Heatmap</span><span class="hi">दबाव हीटमैप</span></div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px"><span class="en">6×3 sensor grid — front and back body view</span><span class="hi">6×3 सेंसर ग्रिड</span></div>
+        </div>
+        <select id="heatmapSelect" onchange="renderHeatmap(this.value)" style="padding:9px 12px;border:1px solid var(--border2);border-radius:var(--rx);background:var(--surface);color:var(--text);font-size:13px;min-width:200px">
+          <option value="">-- Select Patient --</option>
+        </select>
       </div>
 
-    </div><!-- /onboarding -->
-
-
-    <!-- ══════════════════════════════════════════════════
-         PAGE 4: SYSTEM HEALTH
-    ══════════════════════════════════════════════════ -->
-    <div class="page" id="page-health">
-
-      <div class="page-header">
-        <div class="page-title">System Health</div>
-        <div class="page-subtitle">Backend status, AI engine, and sensor simulation</div>
+      <div id="heatmapEmpty" class="empty">
+        <div class="empty-ico">🌡️</div>
+        <div class="empty-txt"><span class="en">Select a patient to view pressure heatmap</span><span class="hi">हीटमैप देखने के लिए मरीज़ चुनें</span></div>
       </div>
 
-      <div class="health-grid">
-        <div class="health-card">
-          <div class="health-icon">🖥️</div>
-          <div>
-            <div class="health-name">Backend Server</div>
-            <div class="health-status" id="hBackend">Checking…</div>
+      <div id="heatmapPanel" style="display:none;flex-direction:column;gap:16px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div id="heatmapPatientInfo" style="font-size:15px;font-weight:800"></div>
+          <div id="heatmapChip"></div>
+          <div style="flex:1"></div>
+          <div id="heatmapPostureInfo" style="font-size:12.5px;font-weight:700;color:var(--accent)"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="card">
+            <div class="ch">
+              <div class="ct"><span class="en">Front View</span><span class="hi">सामने का दृश्य</span></div>
+              <div id="postureChip" class="chip safe">Supine</div>
+            </div>
+            <div style="display:flex;gap:14px;align-items:flex-start">
+              <div style="flex:1">
+                <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+                  <span style="font-size:10px;color:var(--muted);font-weight:700"><span class="en">HEAD</span><span class="hi">सिर</span></span>
+                  <span style="font-size:10px;color:var(--muted);font-weight:700">L | C | R</span>
+                </div>
+                <div class="sg" id="sensorGridFront"></div>
+                <div style="text-align:right;margin-top:5px;font-size:10px;color:var(--muted);font-weight:700"><span class="en">FEET</span><span class="hi">पैर</span></div>
+              </div>
+              <div style="font-size:10.5px;color:var(--muted)">
+                <div style="font-weight:800;margin-bottom:4px;font-size:10px;text-transform:uppercase;letter-spacing:.08em"><span class="en">Regions</span><span class="hi">क्षेत्र</span></div>
+                <div id="regionLabels"></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="ch"><div class="ct"><span class="en">Back View (Pressure Points)</span><span class="hi">पीछे का दृश्य</span></div></div>
+            <div style="display:flex;gap:14px;align-items:flex-start">
+              <div style="flex:1">
+                <div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:5px"><span class="en">HEAD</span><span class="hi">सिर</span></div>
+                <div class="sg" id="sensorGridBack"></div>
+                <div style="text-align:right;margin-top:5px;font-size:10px;color:var(--muted);font-weight:700"><span class="en">SACRUM / HEELS</span><span class="hi">त्रिकास्थि / एड़ी</span></div>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="health-card">
-          <div class="health-icon">🤖</div>
-          <div>
-            <div class="health-name">AI Model</div>
-            <div class="health-status" id="hModel">Checking…</div>
+        <div class="g2">
+          <div class="card">
+            <div class="ct" style="margin-bottom:10px"><span class="en">Pressure Scale</span><span class="hi">दबाव स्तर</span></div>
+            <div style="height:14px;border-radius:4px;background:linear-gradient(90deg,#22c55e,#eab308,#f97316,#ef4444,#7f1d1d);margin-bottom:6px"></div>
+            <div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);font-weight:700">
+              <span>0 mmHg</span><span>40</span><span>80</span><span>120</span><span>160+</span>
+            </div>
+            <div style="margin-top:10px;font-size:11.5px;color:var(--muted);line-height:1.6">
+              <span class="en">Active sensors show live pressure readings. Inactive (gray) sensors are not under contact.</span>
+              <span class="hi">सक्रिय सेंसर लाइव दबाव दिखाते हैं। निष्क्रिय सेंसर (ग्रे) संपर्क में नहीं हैं।</span>
+            </div>
           </div>
-        </div>
-        <div class="health-card">
-          <div class="health-icon">⚙️</div>
-          <div>
-            <div class="health-name">RI Engine</div>
-            <div class="health-status" id="hEngine">Checking…</div>
-          </div>
-        </div>
-        <div class="health-card">
-          <div class="health-icon">📡</div>
-          <div>
-            <div class="health-name">Sensor Simulation</div>
-            <div class="health-status" id="hSensor">Checking…</div>
-          </div>
-        </div>
-        <div class="health-card">
-          <div class="health-icon">🏥</div>
-          <div>
-            <div class="health-name">Monitored Patients</div>
-            <div class="health-status" id="hPatients">—</div>
-          </div>
-        </div>
-        <div class="health-card">
-          <div class="health-icon">⏱️</div>
-          <div>
-            <div class="health-name">System Uptime</div>
-            <div class="health-status" id="hUptime">—</div>
+          <div class="card">
+            <div class="ct" style="margin-bottom:10px"><span class="en">Highest Pressure Zones</span><span class="hi">उच्चतम दबाव क्षेत्र</span></div>
+            <div id="hotZonesList" style="display:flex;flex-direction:column;gap:5px"></div>
           </div>
         </div>
       </div>
+    </section>
 
-      <!-- Formula reference -->
-      <div class="formula-box">
-        <div class="formula-title">Core AI Formula</div>
-        <div class="formula-eq">RI = ( P / 32 ) × T × F<sub>mo</sub> × F<sub>sh</sub> + S</div>
-        <div class="formula-vars">
-          <div class="formula-var"><b>P</b> — Pressure in mmHg</div>
-          <div class="formula-var"><b>T</b> — Time immobility multiplier</div>
-          <div class="formula-var"><b>F<sub>mo</sub></b> — Moisture × temperature factor</div>
-          <div class="formula-var"><b>F<sub>sh</sub></b> — Shear factor from bed angle</div>
-          <div class="formula-var"><b>S</b> — Systemic medical score</div>
-          <div class="formula-var"><b>RI &lt; 10</b> = Low risk</div>
-          <div class="formula-var"><b>RI 10–25</b> = Moderate risk</div>
-          <div class="formula-var"><b>RI 25–50</b> = High risk</div>
-          <div class="formula-var"><b>RI ≥ 50</b> = Very High / Critical</div>
+    <!-- ═══ ADD PATIENT ═══ -->
+    <section class="page" id="page-add">
+      <div style="font-size:22px;font-weight:800;letter-spacing:-.03em;margin-bottom:2px"><span class="en">Add Patient</span><span class="hi">मरीज़ जोड़ें</span></div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px"><span class="en">Fill in patient details. Risk score previews automatically.</span><span class="hi">मरीज़ की जानकारी भरें। जोखिम स्कोर स्वतः दिखता है।</span></div>
+      <div class="g2">
+        <div class="card">
+          <div class="ch"><div class="ct"><span class="en">Patient Information</span><span class="hi">मरीज़ की जानकारी</span></div></div>
+          <div class="fg">
+            <div class="field"><label class="fl"><span class="en">Name</span><span class="hi">नाम</span></label><input type="text" id="fName" placeholder="Patient Name"/></div>
+            <div class="field"><label class="fl"><span class="en">Age</span><span class="hi">आयु</span></label><input type="number" id="fAge" placeholder="e.g. 68" min="1" max="120"/></div>
+            <div class="field"><label class="fl"><span class="en">Ward</span><span class="hi">वार्ड</span></label><input type="text" id="fWard" placeholder="e.g. ICU-A"/></div>
+            <div class="field"><label class="fl"><span class="en">Bed</span><span class="hi">बेड</span></label><input type="text" id="fBed" placeholder="e.g. A1"/></div>
+            <div class="field"><label class="fl"><span class="en">Contact</span><span class="hi">संपर्क</span></label><input type="text" id="fContact" placeholder="Phone"/></div>
+            <div class="field"><label class="fl"><span class="en">Nurse</span><span class="hi">नर्स</span></label><input type="text" id="fNurse" placeholder="Attending nurse"/></div>
+            <div class="field" style="grid-column:1/-1"><label class="fl"><span class="en">Primary Condition</span><span class="hi">मुख्य स्थिति</span></label>
+              <select id="fCondition">
+                <option>Stroke</option><option>ICU Ventilated</option><option>Diabetes</option>
+                <option>Coma</option><option>Orthopedic</option><option>Cardiac</option><option>Other</option>
+              </select>
+            </div>
+            <div class="field" style="grid-column:1/-1"><label class="fl"><span class="en">Sliding / Shear</span><span class="hi">शियर</span></label>
+              <select id="fSliding" onchange="updatePreview()">
+                <option value="none">None</option><option value="occasional">Occasional</option><option value="continuous">Continuous</option>
+              </select>
+            </div>
+          </div>
+          <div class="ct" style="margin:16px 0 10px"><span class="en">Sensor Readings</span><span class="hi">सेंसर रीडिंग</span></div>
+          <div class="fg">
+            <div class="field"><label class="fl"><span class="en">Pressure (mmHg)</span></label><input type="number" id="fPressure" placeholder="50" min="0" max="200"/></div>
+            <div class="field"><label class="fl"><span class="en">Humidity (%)</span></label><input type="number" id="fHumidity" placeholder="55" min="0" max="100"/></div>
+            <div class="field"><label class="fl"><span class="en">Temp (°C)</span></label><input type="number" id="fTemp" placeholder="37" min="35" max="42" step="0.1"/></div>
+            <div class="field"><label class="fl"><span class="en">Bed Angle (°)</span></label><input type="number" id="fAngle" placeholder="30" min="0" max="90"/></div>
+            <div class="field" style="grid-column:1/-1"><label class="fl"><span class="en">Immobile Time (min)</span></label><input type="number" id="fTime" placeholder="60" min="0"/></div>
+          </div>
+          <div class="ct" style="margin:16px 0 10px"><span class="en">Braden Subscores</span><span class="hi">ब्रेडन उपस्कोर</span></div>
+          <div class="fg">
+            <div class="sg-wrap"><div class="sg-head"><span class="en">Sensory Perception</span><span class="sg-val" id="sv_sensory">4</span></div><input type="range" id="sl_sensory" min="1" max="4" value="4" oninput="document.getElementById('sv_sensory').textContent=this.value;updatePreview()"/></div>
+            <div class="sg-wrap"><div class="sg-head"><span class="en">Moisture</span><span class="sg-val" id="sv_moisture">4</span></div><input type="range" id="sl_moisture" min="1" max="4" value="4" oninput="document.getElementById('sv_moisture').textContent=this.value;updatePreview()"/></div>
+            <div class="sg-wrap"><div class="sg-head"><span class="en">Activity</span><span class="sg-val" id="sv_activity">4</span></div><input type="range" id="sl_activity" min="1" max="4" value="4" oninput="document.getElementById('sv_activity').textContent=this.value;updatePreview()"/></div>
+            <div class="sg-wrap"><div class="sg-head"><span class="en">Mobility</span><span class="sg-val" id="sv_mobility">4</span></div><input type="range" id="sl_mobility" min="1" max="4" value="4" oninput="document.getElementById('sv_mobility').textContent=this.value;updatePreview()"/></div>
+            <div class="sg-wrap"><div class="sg-head"><span class="en">Nutrition</span><span class="sg-val" id="sv_nutrition">4</span></div><input type="range" id="sl_nutrition" min="1" max="4" value="4" oninput="document.getElementById('sv_nutrition').textContent=this.value;updatePreview()"/></div>
+            <div class="sg-wrap"><div class="sg-head"><span class="en">Friction</span><span class="sg-val" id="sv_friction">3</span></div><input type="range" id="sl_friction" min="1" max="3" value="3" oninput="document.getElementById('sv_friction').textContent=this.value;updatePreview()"/></div>
+          </div>
+          <div style="margin-top:16px;display:flex;gap:10px">
+            <button class="btn btn-primary" onclick="submitPatient()"><span class="en">✓ Add Patient</span><span class="hi">✓ मरीज़ जोड़ें</span></button>
+            <button class="btn btn-ghost" onclick="resetForm()"><span class="en">Reset</span><span class="hi">रीसेट</span></button>
+          </div>
+          <div id="formMsg" style="display:none;margin-top:10px;padding:10px 12px;border-radius:var(--rx);font-size:13px;font-weight:700;border:1px solid"></div>
+        </div>
+
+        <!-- Risk preview -->
+        <div class="card">
+          <div class="ch"><div class="ct"><span class="en">Risk Preview</span><span class="hi">जोखिम पूर्वावलोकन</span></div></div>
+          <div class="sdisplay" style="margin-bottom:14px">
+            <div class="snum" id="prevScore">—</div>
+            <div class="sbar"><div class="sbf" id="prevBar" style="width:0%"></div></div>
+            <div id="prevChip"></div>
+          </div>
+          <!-- Formula visible in preview -->
+          <div style="padding:10px 12px;background:var(--bg);border-radius:var(--rx);border:1px solid var(--border);margin-bottom:12px">
+            <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:5px">Formula Breakdown</div>
+            <div id="prevFormula" style="font-family:var(--mono);font-size:12px;color:var(--accent)">—</div>
+          </div>
+          <div class="hgrid" style="margin-bottom:12px">
+            <div class="hitem"><span class="hkey">Braden</span><span class="hval" id="prevBraden">—</span></div>
+            <div class="hitem"><span class="hkey">B (Braden)</span><span class="hval" id="prevB">—</span></div>
+            <div class="hitem"><span class="hkey">P (Pressure)</span><span class="hval" id="prevP">—</span></div>
+            <div class="hitem"><span class="hkey">T (Time)</span><span class="hval" id="prevT">—</span></div>
+            <div class="hitem"><span class="hkey">M (Moisture)</span><span class="hval" id="prevM">—</span></div>
+            <div class="hitem"><span class="hkey">H (Shear)</span><span class="hval" id="prevH">—</span></div>
+          </div>
+          <div class="ct" style="margin-bottom:8px;font-size:12.5px"><span class="en">Recommendations</span><span class="hi">अनुशंसाएं</span></div>
+          <div id="prevRecommendations" class="al"></div>
         </div>
       </div>
+    </section>
 
-      <button class="btn btn-outline" onclick="loadSystemHealth()">↻ Refresh Status</button>
-    </div><!-- /health -->
+    <!-- ═══ SYSTEM HEALTH ═══ -->
+    <section class="page" id="page-health">
+      <div style="font-size:22px;font-weight:800;letter-spacing:-.03em"><span class="en">System Health</span><span class="hi">सिस्टम स्वास्थ्य</span></div>
+      <div class="g2">
+        <div class="card">
+          <div class="ch"><div class="ct"><span class="en">Backend Status</span><span class="hi">बैकएंड स्थिति</span></div></div>
+          <div id="healthBackend" style="font-size:13px;color:var(--muted);line-height:1.7"></div>
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <button class="btn btn-primary btn-sm" onclick="refreshAll()"><span class="en">↻ Refresh Status</span><span class="hi">↻ ताज़ा करें</span></button>
+            <button class="btn btn-ghost btn-sm" onclick="simulateUpdate()"><span class="en">Run Simulation</span><span class="hi">सिमुलेशन</span></button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><div class="ct"><span class="en">Ward Summary</span><span class="hi">वार्ड सारांश</span></div></div>
+          <div id="healthSummary" class="hgrid"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ct"><span class="en">HAPU Risk Model — Formula Reference</span><span class="hi">HAPU जोखिम मॉडल</span></div></div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.8">
+          <p style="margin-bottom:10px"><strong>Risk Score = softCap(B × P × T × M × H)</strong>, where softCap(r) = 5r/(r+4) maps raw value to 0–5 scale.</p>
+          <div class="hgrid">
+            <div class="hitem"><span class="hkey">B — Braden Vulnerability</span><span class="hval">(23−score)/17</span></div>
+            <div class="hitem"><span class="hkey">P — Pressure Multiplier</span><span class="hval">1.0–2.0×</span></div>
+            <div class="hitem"><span class="hkey">T — Time Multiplier</span><span class="hval">1.0–2.5×</span></div>
+            <div class="hitem"><span class="hkey">M — Moisture Multiplier</span><span class="hval">1.0–1.4×</span></div>
+            <div class="hitem"><span class="hkey">H — Shear Multiplier</span><span class="hval">1.0–1.625×</span></div>
+            <div class="hitem"><span class="hkey">Braden Scale</span><span class="hval">6–23 (lower = worse)</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ct"><span class="en">Action History</span><span class="hi">क्रिया इतिहास</span></div></div>
+        <div id="globalHistory" style="display:flex;flex-direction:column;gap:7px;max-height:300px;overflow-y:auto"></div>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ct"><span class="en">Data Source Info</span><span class="hi">डेटा स्रोत</span></div></div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.8">
+          <span class="en">All sensor data and patient information is processed using the HAPU prevention model. When the Flask backend at <code style="font-family:var(--mono);color:var(--accent)">localhost:5000</code> is available, live data is fetched from the Python app. Otherwise, demo data is shown automatically.</span>
+          <span class="hi">सभी सेंसर डेटा HAPU मॉडल द्वारा प्रोसेस होते हैं। Flask बैकएंड उपलब्ध होने पर लाइव डेटा आता है।</span>
+        </div>
+      </div>
+    </section>
 
-  </main>
-</div><!-- /shell -->
+  </div><!-- .content -->
+</div><!-- .main -->
+</div><!-- .shell -->
 
+<!-- ═══ PATIENT DETAILS MODAL ═══ -->
+<div class="moverlay" id="detailsModal" hidden onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="mh">
+      <div>
+        <div style="font-size:22px;font-weight:800;letter-spacing:-.04em" id="modalName">Patient</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px" id="modalMeta"></div>
+      </div>
+      <button class="mc-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="mgrid">
+      <div>
+        <div class="ct" style="margin-bottom:10px"><span class="en">Risk Assessment</span><span class="hi">जोखिम आकलन</span></div>
+        <div class="sdisplay" style="margin-bottom:12px">
+          <div class="snum" id="modalScore">—</div>
+          <div class="sbar"><div class="sbf" id="modalScoreBar" style="width:0%"></div></div>
+          <div id="modalChip" style="margin-top:7px"></div>
+        </div>
+        <div id="modalFactors" style="display:flex;flex-direction:column;gap:7px;margin-bottom:12px"></div>
+        <div class="btn-group">
+          <button class="btn btn-primary btn-sm" onclick="goMonitorFromModal()"><span class="en">Open Monitoring</span><span class="hi">निगरानी खोलें</span></button>
+          <button class="btn btn-success btn-sm" onclick="treatFromModal('reposition')">🔄 <span class="en">Reposition</span><span class="hi">स्थिति बदलें</span></button>
+          <button class="btn btn-warn btn-sm" onclick="treatFromModal('bedsheet_change')">🛏️ <span class="en">Bedsheet</span><span class="hi">चादर</span></button>
+        </div>
+      </div>
+      <div>
+        <div class="ct" style="margin-bottom:10px"><span class="en">Recommended Actions</span><span class="hi">अनुशंसित कार्य</span></div>
+        <div id="modalActions" class="al"></div>
+        <div style="margin-top:12px">
+          <div class="ct" style="margin-bottom:7px;font-size:12.5px"><span class="en">Patient Details</span><span class="hi">मरीज़ का विवरण</span></div>
+          <div id="modalDetails" style="display:flex;flex-direction:column;gap:5px;font-size:12.5px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- ═══ JAVASCRIPT ═══ -->
 <script>
-/* ──────────────────────────────────────────────────────────
-   CONFIGURATION
-──────────────────────────────────────────────────────────── */
-const API = "http://127.0.0.1:5000";   // Flask backend URL
-let autoUpdateInterval = null;
-let patientCache = [];                 // cache of loaded patients
+'use strict';
+// ─── Constants & State ─────────────────────────────
+const API = 'http://localhost:5000/api';
+let usingDemo = false;
+let currentLang = 'both';
+let currentTheme = 'light';
+let currentMode = 'simple';
+const AUTO_REFRESH_MS = 30000;
 
-/* ──────────────────────────────────────────────────────────
-   NAVIGATION
-──────────────────────────────────────────────────────────── */
+const state = {
+  patients: [],
+  systemStatus: null,
+  selectedMonitorId: null,
+  selectedQuickId: null,
+  openModalId: null,
+  lastUpdated: null
+};
 
-document.querySelectorAll(".nav-item").forEach(item => {
+// ─── Demo Data (mirrors app.py seed_patients) ──────
+const DEMO = [
+  {id:'d1',name:'Asha Kumari',age:68,ward:'ICU-B',bed:'B3',contact:'9880001111',attended_by:'Nurse Priya',primary_condition:'Diabetes / Paralysis',co_conditions:['Diabetes','Paralysis'],pressure:72,humidity:85,temperature:37.5,bed_angle:50,immobile_time:180,sliding:'continuous',sensory:2,moisture_score:2,activity:1,mobility:1,nutrition:2,friction:2},
+  {id:'d2',name:'Sunita Devi',age:82,ward:'ICU-A',bed:'A2',contact:'9880002222',attended_by:'Nurse Rohit',primary_condition:'Cardiac / Renal',co_conditions:['Cardiac','Renal'],pressure:82,humidity:92,temperature:38.2,bed_angle:55,immobile_time:240,sliding:'continuous',sensory:1,moisture_score:1,activity:1,mobility:1,nutrition:1,friction:1},
+  {id:'d3',name:'Rajat Singh',age:54,ward:'Ward-C',bed:'C5',contact:'9880003333',attended_by:'Nurse Sana',primary_condition:'Hypertension',co_conditions:['Hypertension'],pressure:58,humidity:70,temperature:36.8,bed_angle:30,immobile_time:90,sliding:'occasional',sensory:3,moisture_score:3,activity:2,mobility:2,nutrition:3,friction:2},
+];
 
-  item.addEventListener("click", () => {
-    document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
-    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-    item.classList.add("active");
-    const page = item.dataset.page;
-    document.getElementById("page-" + page).classList.add("active");
+let demoHistory = {
+  d1:[{timestamp:new Date(Date.now()-5400000).toISOString(),action:'Repositioned to left side',nurse:'Nurse Priya',remarks:'Sacrum offloaded',risk_score:3.1,risk_change:-0.4}],
+  d2:[{timestamp:new Date(Date.now()-4200000).toISOString(),action:'Heel offloading added',nurse:'Nurse Rohit',remarks:'Critical pressure relief',risk_score:4.6,risk_change:-0.2}],
+  d3:[{timestamp:new Date(Date.now()-3300000).toISOString(),action:'Routine review',nurse:'Nurse Sana',remarks:'No open skin',risk_score:1.8,risk_change:0}],
+};
 
-    // Trigger data loads per page
-    if (page === "dashboard")  setTimeout(loadPatients,500);
-    if (page === "monitoring") populateMonitorSelect();
-    if (page === "health")     loadSystemHealth();
-  });
-});
-
-/* ──────────────────────────────────────────────────────────
-   HELPER: RISK COLOR CLASS
-──────────────────────────────────────────────────────────── */
-function riskClass(level) {
-  const map = { "Low":"low", "Moderate":"moderate", "High":"high", "Very High":"critical" };
-  return "badge-" + (map[level] || "low");
+// ─── Risk Model (B×P×T×M×H) ─────────────────────
+function bradenVulnerability(b){return Math.max(0.01,Math.min(1.0,(23-b)/17))}
+function pressureMultiplier(p){if(p<32)return 1.0;if(p<=50)return 1.3;if(p<=70)return 1.6;return 2.0}
+function timeMultiplier(m){if(m<30)return 1.0;if(m<60)return 1.2;if(m<120)return 1.5;if(m<180)return 2.0;return 2.5}
+function moistureMultiplier(rh,temp){let b=rh<40?1.0:rh<=60?1.2:rh<=80?1.3:1.4;return b*(1.0+Math.max(0,(temp-37)/10))}
+function shearMultiplier(angle,sliding){let af=angle<=15?1.0:angle<=30?1.1:angle<=45?1.2:1.3;let sf={none:1.0,occasional:1.1,continuous:1.25}[sliding]||1.0;return af*sf}
+function computeBraden(p){return(+p.sensory||4)+(+p.moisture_score||4)+(+p.activity||4)+(+p.mobility||4)+(+p.nutrition||4)+Math.min(3,+p.friction||3)}
+function softCap(r){return r<=0?0:5*r/(r+4)}
+function contributions(B,P,T,M,H){
+  let factors={B,P,T,M,H};
+  let total=Object.values(factors).reduce((s,v)=>s+Math.max(0,v-1),0);
+  if(!total)return{B:0,P:0,T:0,M:0,H:0};
+  let out={};for(let k in factors)out[k]=Math.round(Math.max(0,factors[k]-1)/total*1000)/1000;
+  return out;
 }
-function riskColor(level) {
-  const map = { "Low":"var(--low)", "Moderate":"var(--moderate)", "High":"var(--high)", "Very High":"var(--critical)" };
-  return map[level] || "var(--text)";
+function computePatient(p){
+  let braden=computeBraden(p);
+  let B=bradenVulnerability(braden),P=pressureMultiplier(+p.pressure||50),T=timeMultiplier(+p.immobile_time||60);
+  let M=moistureMultiplier(+p.humidity||50,+p.temperature||37),H=shearMultiplier(+p.bed_angle||30,p.sliding||'none');
+  let rRaw=B*P*T*M*H;
+  let score=Math.round(softCap(rRaw)*100)/100;
+  let contribs=contributions(B,P,T,M,H);
+  let level=score<=1?'Safe':score<=2?'Low Risk':score<=3?'Moderate':score<=4?'High Risk':'Critical';
+  let colorMap={Safe:'#10b981','Low Risk':'#f59e0b',Moderate:'#f97316','High Risk':'#ef4444',Critical:'#b91c1c'};
+  let toneMap={Safe:'safe','Low Risk':'low',Moderate:'mod','High Risk':'high',Critical:'crit'};
+  let actionMap={B:'Review Braden subscores — check mobility, activity, nutrition.',P:'Reposition & offload affected body area immediately.',T:'Reposition patient now — time threshold exceeded.',M:'Clean & dry skin; change bedding; apply moisture barrier.',H:'Lower bed angle and correct posture to reduce shear force.'};
+  let actions=Object.entries(contribs).filter(([,v])=>v>=0.25).map(([k])=>({factor:k,action:actionMap[k],contribution:contribs[k]}));
+  let grid=generateSensorGrid(+p.pressure||50,+p.bed_angle||30,+p.immobile_time||0);
+  let hotspot=grid.reduce((a,b)=>a.value>b.value?a:b,grid[0]);
+  return{
+    ...p,braden_score:braden,B,P_factor:P,T_factor:T,M_factor:M,H_factor:H,
+    r_raw:Math.round(rRaw*1000)/1000,risk_score:score,risk_level:level,
+    risk_color:colorMap[level],risk_tone:toneMap[level],
+    contributions:contribs,recommended_actions:actions,
+    sensor_grid:grid,hotspot_region:hotspot?.region||'Sacrum',
+    alerts:actions.length?actions.map(a=>a.action):['Continue routine monitoring.']
+  };
 }
-
-/* ──────────────────────────────────────────────────────────
-   HELPER: FORMAT SECONDS AS HH:MM:SS
-──────────────────────────────────────────────────────────── */
-function formatUptime(s) {
-  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
-  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
-}
-
-/* ──────────────────────────────────────────────────────────
-   LOAD ALL PATIENTS (Dashboard + cache)
-──────────────────────────────────────────────────────────── */
-async function loadPatients() {
-  try {
-    const res = await fetch(`${API}/patients`);
-    const patients = await res.json();
-    patientCache = patients;
-
-    // ── Summary stats ──
-    document.getElementById("statTotal").textContent = patients.length;
-    document.getElementById("statHigh").textContent  = patients.filter(p => p.ri >= 25).length;
-    document.getElementById("statCrit").textContent  = patients.filter(p => p.ri >= 50).length;
-
-    // ── Priority banner (first = highest priority) ──
-    if (patients.length > 0) {
-      const top = patients[0];
-      document.getElementById("priorityName").textContent = `Attend ${top.name} First`;
-      document.getElementById("priorityRI").textContent   = `RI = ${top.ri} — ${top.risk_level}`;
+function generateSensorGrid(pressure,angle,immobileTime){
+  let grid=[],regionLabels=['Head','Shoulders','Upper Back','Lower Back','Sacrum/Coccyx','Heels'];
+  for(let r=0;r<6;r++){
+    for(let c=0;c<3;c++){
+      let base,isSitting=angle>45;
+      if(isSitting){let dist=Math.abs(r-4)+Math.abs(c-1);base=pressure*Math.max(0,1-dist*0.15)}
+      else{
+        if(r===4)base=pressure*(0.9-Math.abs(c-1)*0.3);
+        else if(r===1)base=pressure*0.6;
+        else if(r===5)base=pressure*(c!==1?0.7:0.4);
+        else base=pressure*Math.max(0.1,0.4-Math.abs(r-3)*0.08);
+      }
+      let tBoost=Math.min(1.5,1+immobileTime/480);
+      let noise=0.88+Math.random()*0.24;
+      let val=Math.max(0,Math.min(200,Math.round(base*tBoost*noise*10)/10));
+      grid.push({row:r,col:c,value:val,region:regionLabels[r],active:true});
     }
-
-    // ── Build table rows ──
-    const tbody = document.getElementById("patientTable");
-    tbody.innerHTML = patients.map((p, i) => {
-      const isTop = i === 0;
-      const alertCount = p.alerts.length;
-      const alertBadge = alertCount > 0
-        ? `<span style="color:var(--critical)">${alertCount} alert${alertCount>1?'s':''}</span>`
-        : `<span style="color:var(--low)">✓ Clear</span>`;
-
-      return `
-        <tr class="${isTop ? 'top-priority' : ''}"
-            onclick="goMonitor(${p.id})" title="Click to monitor">
-          <td class="${i===0?'rank-1':'rank'}">${isTop ? '🔴' : '#' + p.priority}</td>
-          <td style="color:#fff;font-weight:500">${p.name}</td>
-          <td><span style="color:var(--muted)">${p.condition}</span></td>
-          <td>${p.pressure} mmHg</td>
-          <td>${p.time} min</td>
-          <td style="color:${riskColor(p.risk_level)};font-family:var(--font-display);font-weight:700;font-size:15px">${p.ri}</td>
-          <td><span class="badge ${riskClass(p.risk_level)}">${p.risk_level}</span></td>
-          <td>${alertBadge}</td>
-        </tr>`;
-    }).join("");
-
-    document.getElementById("backendStatus").textContent = "Backend Online";
-  } catch (e) {
-    // Backend offline — show fallback
-    document.getElementById("backendStatus").textContent = "Backend Offline";
-    document.getElementById("patientTable").innerHTML =
-      `<tr><td colspan="8" style="text-align:center;color:var(--critical);padding:24px">
-        ⚠️ Cannot reach backend. Is Flask running on port 5000?
-      </td></tr>`;
   }
+  return grid;
 }
+function processDemoPatients(){return DEMO.map(p=>computePatient({...p})).sort((a,b)=>b.risk_score-a.risk_score)}
 
-/* ──────────────────────────────────────────────────────────
-   GO TO MONITOR PAGE FOR A SPECIFIC PATIENT
-──────────────────────────────────────────────────────────── */
-function goMonitor(patientId) {
-  // Switch to monitoring page
-  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
-  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-  document.querySelector('[data-page="monitoring"]').classList.add("active");
-  document.getElementById("page-monitoring").classList.add("active");
-
-  // Set the select and load
-  populateMonitorSelect(patientId);
-}
-
-/* ──────────────────────────────────────────────────────────
-   MONITORING PAGE
-──────────────────────────────────────────────────────────── */
-function populateMonitorSelect(selectId = null) {
-  const sel = document.getElementById("monitorSelect");
-  const current = selectId || sel.value;
-  sel.innerHTML = '<option value="">— Select a patient —</option>' +
-    patientCache.map(p =>
-      `<option value="${p.id}">${p.name} (RI: ${p.ri})</option>`
-    ).join("");
-  if (current) {
-    sel.value = current;
-    loadMonitorData();
-  }
-}
-
-function loadMonitorData() {
-  const sel  = document.getElementById("monitorSelect");
-  const id   = parseInt(sel.value);
-  if (!id) return;
-
-  const p = patientCache.find(x => x.id === id);
-  if (!p) return;
-
-  // RI gauge
-  document.getElementById("monRI").textContent = p.ri;
-  document.getElementById("monRI").style.color = riskColor(p.risk_level);
-  document.getElementById("monRisk").innerHTML =
-    `<span class="badge ${riskClass(p.risk_level)}">${p.risk_level}</span>`;
-
-  // Factor cards
-  setFactor("monP",     p.pressure,   `${p.pressure} mmHg`, p.pressure / 120 * 100);
-  setFactor("monT",     p.T,          `${p.T}×`,            Math.min(100, p.T / 4 * 100));
-  setFactor("monFmo",   p.Fmo,        p.Fmo,                (p.Fmo - 1) / 1.5 * 100);
-  setFactor("monFsh",   p.Fsh,        p.Fsh,                (p.Fsh - 1) / 2 * 100);
-  setFactor("monS",     p.S,          `${p.S} pts`,         p.S / 3 * 100);
-  setFactor("monAngle", p.angle,      `${p.angle}°`,        p.angle / 80 * 100);
-
-  // Alerts
-  renderAlerts("monAlerts", p.alerts);
-}
-
-function setFactor(id, val, display, pct) {
-  document.getElementById(id).textContent = display;
-  const bar = document.getElementById(id + "Bar");
-  if (bar) bar.style.width = Math.max(0, Math.min(100, pct)) + "%";
-}
-
-function renderAlerts(containerId, alerts) {
-  const el = document.getElementById(containerId);
-  if (!alerts || alerts.length === 0) {
-    el.innerHTML = '<div class="alert-item alert-ok">✓ No active alerts for this patient</div>';
-    return;
-  }
-  el.innerHTML = alerts.map((a, i) => {
-    const cls = i === 0 ? "alert-critical" : (i === 1 ? "alert-warning" : "alert-info");
-    return `<div class="alert-item ${cls}">${a}</div>`;
-  }).join("");
-}
-
-/* ──────────────────────────────────────────────────────────
-   LIVE PREVIEW ON ONBOARDING PAGE
-──────────────────────────────────────────────────────────── */
-async function previewRI() {
-  const payload = {
-    pressure: +document.getElementById("newPressure").value,
-    time:     +document.getElementById("newTime").value,
-    rh:       +document.getElementById("newRH").value,
-    temp:     +document.getElementById("newTemp").value,
-    angle:    +document.getElementById("newAngle").value,
-    S: { "Normal":0, "Diabetes":2, "Stroke":2.5, "ICU Ventilated":2.5, "Coma":3 }
-        [document.getElementById("newCondition").value] || 0
-  };
-
-  // Update slider display labels
-  document.getElementById("lPressure").textContent = payload.pressure;
-  document.getElementById("lTime").textContent = payload.time;
-  document.getElementById("lRH").textContent = payload.rh;
-  document.getElementById("lTemp").textContent = payload.temp.toFixed(1);
-  document.getElementById("lAngle").textContent = payload.angle;
-
-  try {
-    const res = await fetch(`${API}/predict`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-    document.getElementById("previewRI").textContent = data.ri;
-    document.getElementById("previewRI").style.color = riskColor(data.risk_level);
-    document.getElementById("previewRisk").innerHTML =
-      `<span class="badge ${riskClass(data.risk_level)}">${data.risk_level}</span>`;
-    renderAlerts("previewAlerts", data.alerts);
-  } catch {}
-}
-
-// Attach live preview to all onboarding sliders
-["newPressure","newTime","newRH","newTemp","newAngle","newCondition"].forEach(id => {
-  document.getElementById(id)?.addEventListener("input", previewRI);
-  document.getElementById(id)?.addEventListener("change", previewRI);
-});
-
-/* ──────────────────────────────────────────────────────────
-   ADD PATIENT
-──────────────────────────────────────────────────────────── */
-async function addPatient() {
-  const name = document.getElementById("newName").value.trim();
-  if (!name) { alert("Please enter a patient name."); return; }
-
-  const payload = {
-    name,
-    condition: document.getElementById("newCondition").value,
-    pressure:  +document.getElementById("newPressure").value,
-    time:      +document.getElementById("newTime").value,
-    rh:        +document.getElementById("newRH").value,
-    temp:      +document.getElementById("newTemp").value,
-    angle:     +document.getElementById("newAngle").value,
-  };
-
-  try {
-    const res = await fetch(`${API}/add_patient`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-    const msg = document.getElementById("addSuccess");
-    msg.style.display = "block";
-    msg.textContent = `✓ ${data.message} (ID #${data.id})`;
-    document.getElementById("newName").value = "";
-    // Reload patient cache
-    await setTimeout(loadPatients,500);
-    setTimeout(() => { msg.style.display = "none"; }, 4000);
-  } catch (e) {
-    alert("Could not add patient. Is the backend running?");
-  }
-}
-
-/* ──────────────────────────────────────────────────────────
-   SYSTEM HEALTH
-──────────────────────────────────────────────────────────── */
-async function loadSystemHealth() {
-  try {
-    const res = await fetch(`${API}/system_status`);
-    const s = await res.json();
-
-    const setStatus = (id, val, good = true) => {
-      const el = document.getElementById(id);
-      el.textContent = val;
-      el.className = "health-status" + (good ? "" : " offline");
-    };
-
-    setStatus("hBackend",  s.backend   === "online"  ? "✓ Online"  : "✗ Offline",  s.backend === "online");
-    setStatus("hModel",    s.ai_model  === "active"  ? "✓ Active"  : "✗ Inactive", s.ai_model === "active");
-    setStatus("hEngine",   s.ri_engine === "running" ? "✓ Running" : "✗ Stopped",  s.ri_engine === "running");
-    setStatus("hSensor",   s.sensor_sim=== "active"  ? "✓ Active"  : "✗ Inactive", s.sensor_sim === "active");
-    setStatus("hPatients", `${s.patient_count} patients`);
-    setStatus("hUptime",   formatUptime(s.uptime_seconds));
-
-  } catch {
-    ["hBackend","hModel","hEngine","hSensor"].forEach(id => {
-      const el = document.getElementById(id);
-      el.textContent = "✗ Offline";
-      el.className = "health-status offline";
-    });
-  }
-}
-
-/* ──────────────────────────────────────────────────────────
-   AUTO UPDATE — simulates sensor feed every 8 seconds
-──────────────────────────────────────────────────────────── */
-async function runAutoUpdate() {
-  // Tell backend to simulate sensor movement
-  try { await fetch(`${API}/simulate_update`, { method: "POST" }); } catch {}
-  // Re-fetch patients
-  await setTimeout(loadPatients,500);
-  // Refresh monitoring panel if open
-  const monPage = document.getElementById("page-monitoring");
-  if (monPage.classList.contains("active")) {
-    populateMonitorSelect();
-  }
-}
-
-// Start auto-update loop
-autoUpdateInterval = setInterval(runAutoUpdate, 8000);
-
-/* ──────────────────────────────────────────────────────────
-   INITIAL LOAD
-──────────────────────────────────────────────────────────── */
-setTimeout(loadPatients,500);
-loadSystemHealth();
-previewRI();
-
-let autoSim=false;
-let simInt=null;
-
-async function runSimulation(){
+// ─── API Fetch ─────────────────────────────────────
+async function apiFetch(path,opts={}){
   try{
-    await fetch(`${API}/simulate_update`,{method:"POST"});
-    await setTimeout(loadPatients,500);
-  }catch(e){console.error(e);}
+    const res=await fetch(API+path,{headers:{'Content-Type':'application/json'},...opts});
+    if(!res.ok)return null;
+    return await res.json();
+  }catch{return null}
 }
-
-function toggleAutoSim(){
-  autoSim=!autoSim;
-  const btn=document.getElementById("autoBtn");
-  if(autoSim){
-    btn.textContent="⚡ Auto Sim ON";
-    simInt=setInterval(runSimulation,3000);
+async function loadPatients(){
+  let data=await apiFetch('/patients');
+  if(data&&Array.isArray(data.patients)){
+    // Backend returns patients array + burden from app.py /api/patients
+    state.patients=data.patients.map(p=>computePatient(p)).sort((a,b)=>b.risk_score-a.risk_score);
+    usingDemo=false;updateBackendBadge(true);
+  }else if(data&&Array.isArray(data)){
+    state.patients=data.map(p=>computePatient(p)).sort((a,b)=>b.risk_score-a.risk_score);
+    usingDemo=false;updateBackendBadge(true);
   }else{
-    btn.textContent="⚡ Auto Sim OFF";
-    clearInterval(simInt);
+    state.patients=processDemoPatients();usingDemo=true;updateBackendBadge(false);
   }
+  state.patients.forEach((p,i)=>p.priority=i+1);
+}
+async function loadSystemStatus(){
+  let data=await apiFetch('/system_status');
+  if(data&&!usingDemo)state.systemStatus=data;
+  else state.systemStatus={
+    total_patients:state.patients.length,
+    critical_count:state.patients.filter(p=>['Critical','High Risk'].includes(p.risk_level)).length,
+    system_status:state.patients.some(p=>p.risk_level==='Critical')?'Alert':state.patients.some(p=>p.risk_level==='High Risk')?'Elevated':'Normal',
+    average_risk:state.patients.length?Math.round(state.patients.reduce((s,p)=>s+p.risk_score,0)/state.patients.length*100)/100:0,
+    uptime:'—'
+  };
+  updateSysStatusBadge();
+}
+async function loadHistory(patientId){
+  if(usingDemo)return demoHistory[patientId]||[];
+  let data=await apiFetch('/history');
+  if(data&&data.history){
+    // Filter by patient name if possible
+    let p=state.patients.find(x=>x.id===patientId);
+    return data.history.filter(h=>!p||h.nurse&&h.remarks).slice(0,10)||[];
+  }
+  return demoHistory[patientId]||[];
+}
+async function loadGlobalHistory(){
+  if(usingDemo){
+    let all=Object.values(demoHistory).flat().sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
+    return all.slice(0,10);
+  }
+  let data=await apiFetch('/history');
+  return data?.history?.slice(0,10)||[];
 }
 
+// ─── Treatment ─────────────────────────────────────
+async function doTreatmentAPI(patientId,treatment){
+  let nurse=(state.patients.find(p=>p.id===patientId)||{}).attended_by||'Nurse';
+  if(usingDemo){
+    let raw=DEMO.find(x=>x.id===patientId);if(!raw)return null;
+    let oldScore=(state.patients.find(x=>x.id===patientId)||{}).risk_score||0;
+    let actionLog='';
+    if(treatment==='reposition'){raw.immobile_time=0;raw.pressure=Math.max(10,raw.pressure*(0.55+Math.random()*0.2));raw.bed_angle=Math.max(0,raw.bed_angle-(10+Math.random()*20));raw.sliding='none';actionLog='Patient repositioned — pressure & immobility reset.';}
+    else if(treatment==='bedsheet_change'){raw.humidity=Math.max(28,raw.humidity-(15+Math.random()*10));raw.moisture_score=Math.min(4,(raw.moisture_score||2)+1);actionLog='Bedsheet changed — moisture reduced.';}
+    else if(treatment==='moisture_care'){raw.humidity=Math.max(28,raw.humidity-(10+Math.random()*10));raw.moisture_score=Math.min(4,(raw.moisture_score||2)+1);actionLog='Moisture care applied.';}
+    else if(treatment==='pressure_offload'){raw.pressure=Math.max(10,raw.pressure*(0.4+Math.random()*0.25));raw.friction=Math.min(3,(raw.friction||1)+1);actionLog='Pressure offloading device applied.';}
+    else if(treatment==='nutrition'){raw.nutrition=Math.min(4,(raw.nutrition||2)+1);actionLog='Nutritional support administered.';}
+    let updated=computePatient({...raw});
+    let idx=state.patients.findIndex(x=>x.id===patientId);
+    if(idx!==-1)state.patients[idx]={...updated,priority:state.patients[idx].priority};
+    let event={timestamp:new Date().toISOString(),action:actionLog,nurse,remarks:'',risk_score:updated.risk_score,risk_change:Math.round((updated.risk_score-oldScore)*1000)/1000};
+    if(!demoHistory[patientId])demoHistory[patientId]=[];
+    demoHistory[patientId].push(event);
+    return{patient:updated,event};
+  }
+  // Backend call — app.py doesn't have a direct treatment endpoint; use simulate_update as proxy
+  let res=await apiFetch('/simulate_update',{method:'POST'});
+  if(res&&res.patients){state.patients=res.patients.map(p=>computePatient(p)).sort((a,b)=>b.risk_score-a.risk_score);state.patients.forEach((p,i)=>p.priority=i+1);}
+  return{patient:state.patients.find(x=>x.id===patientId)};
+}
+async function doReposition(patientId,nurse){
+  let raw=DEMO.find(x=>x.id===patientId);
+  if(usingDemo&&raw){
+    let oldScore=(state.patients.find(x=>x.id===patientId)||{}).risk_score||0;
+    raw.immobile_time=0;raw.pressure=Math.max(10,raw.pressure*(0.55+Math.random()*0.2));raw.bed_angle=Math.max(0,raw.bed_angle-(10+Math.random()*20));raw.sliding='none';
+    let updated=computePatient({...raw});
+    let idx=state.patients.findIndex(x=>x.id===patientId);
+    if(idx!==-1)state.patients[idx]={...updated,priority:state.patients[idx].priority};
+    let event={timestamp:new Date().toISOString(),action:'Repositioned — patient turned to relieve pressure',nurse:nurse||raw.attended_by,remarks:'Patient repositioned to relieve pressure.',risk_score:updated.risk_score,risk_change:Math.round((updated.risk_score-oldScore)*1000)/1000};
+    if(!demoHistory[patientId])demoHistory[patientId]=[];
+    demoHistory[patientId].push(event);
+    return{patient:updated,event};
+  }
+  return await apiFetch('/simulate_update',{method:'POST'});
+}
 
-let mode = "static";
+// ─── AI Insights (app.py /api/ai_insight) ──────────
+async function fetchAIInsights(){
+  let pid=state.selectedMonitorId;
+  let panel=document.getElementById('aiInsightPanel');
+  if(!pid){panel.innerHTML='<span style="color:var(--mod)">Please select a patient first.</span>';return}
+  let p=state.patients.find(x=>x.id===pid);if(!p)return;
+  panel.innerHTML='<span class="ai-loading">⏳ Analyzing patient risk factors…</span>';
 
-function switchMode(){
-  mode = document.getElementById("modeToggle").value;
-  if(mode==="static"){
-    clearInterval(simInt);
-    document.getElementById("autoBtn").textContent="⚡ Auto Sim OFF";
-    autoSim=false;
-  }else{
-    if(!autoSim){
-      toggleAutoSim();
+  if(!usingDemo){
+    // Call app.py /api/ai_insight with patient id
+    let body={id:pid,nurse:p.attended_by||'System'};
+    let data=await apiFetch('/ai_insight',{method:'POST',body:JSON.stringify(body)});
+    if(data&&data.recommendations){
+      renderAIPanel(data,panel);return;
     }
   }
-}
-
-
-async function previewRI(){
- try{
-  const payload={
-    pressure:+document.getElementById("newPressure").value,
-    time:+document.getElementById("newTime").value,
-    rh:+document.getElementById("newRH").value,
-    temp:+document.getElementById("newTemp").value,
-    angle:+document.getElementById("newAngle").value,
-    S:0
+  // Offline rule-engine fallback (mirrors app.py ai_insight logic)
+  let recs=buildLocalAIRecs(p);
+  let summary={
+    RI:p.r_raw,braden_score:p.braden_score,final_risk:p.risk_score,
+    risk_level:p.risk_level,projected_RI:computePatient({...p,immobile_time:(p.immobile_time||0)+120}).risk_score,
+    alerts:p.alerts
   };
-  const res=await fetch(`${API}/predict`,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify(payload)
-  });
-  const d=await res.json();
-  document.getElementById("previewRI").textContent=d.ri;
-  document.getElementById("previewRisk").textContent=d.risk_level;
- }catch(e){console.log(e);}
+  renderAIPanel({patient_summary:summary,recommendations:recs,analysis_context:'Offline rule engine (demo mode)'},panel);
 }
-</script>
+function buildLocalAIRecs(p){
+  let recs=[];
+  if(p.risk_score>=4){recs.push({action:'Immediate full skin assessment and reposition to 30° tilt',priority:'High',reason:'Critical risk factors detected — HAPU likely within 2 hours without intervention.'});}
+  else if(p.risk_score>=3){recs.push({action:'Reposition patient within 30 minutes; offload sacrum and heels',priority:'High',reason:'High risk. Prolonged pressure imminent tissue damage.'});}
+  else if(p.risk_score>=2){recs.push({action:'Schedule repositioning every 2 hours; apply moisture barrier',priority:'Medium',reason:'Moderate risk; maintain preventive 2-hour turn schedule.'});}
+  else{recs.push({action:'Continue routine monitoring; document skin condition',priority:'Routine',reason:'Risk controlled within preventive range.'});}
+  if(p.humidity>80)recs.push({action:'Immediate skin cleanse and bedsheet change',priority:'High',reason:`Humidity at ${Math.round(p.humidity)}% — maceration risk high.`});
+  if(p.braden_score<=12)recs.push({action:'Initiate specialized pressure-relieving mattress / heel protectors',priority:'High',reason:`Very low Braden score (${p.braden_score}/23) — comprehensive prevention needed.`});
+  if((p.immobile_time||0)>180)recs.push({action:'Patient immobile for ${fmtMin(p.immobile_time)}. Reposition now.',priority:'High',reason:'Extended immobility exceeds safe threshold.'});
+  recs.push({action:'Document condition transparently in nursing notes',priority:'Low',reason:'Maintain complete clinical record for audit and patient trust.'});
+  if(p.nutrition<=2)recs.push({action:'Nutritional consultation — protein supplementation recommended',priority:'Medium',reason:`Braden nutrition subscore ${p.nutrition}/4 indicates malnutrition risk.`});
+  return recs;
+}
+function renderAIPanel(data,panel){
+  let recs=data.recommendations||[];
+  let summary=data.patient_summary||{};
+  let html=`<div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Context: ${escHtml(data.analysis_context||'—')}</div>`;
+  html+=`<div style="margin-bottom:10px;padding:8px 10px;background:var(--bg);border-radius:var(--rx);border:1px solid var(--border);font-size:11.5px">`;
+  html+=`<span style="color:var(--muted)">Projected +2h Risk: </span><strong style="font-family:var(--mono)">${fmtNum(summary.projected_RI,2)}</strong>`;
+  if(summary.alerts&&summary.alerts.length)html+=` &nbsp;|&nbsp; <span style="color:var(--mod)">${escHtml(summary.alerts[0])}</span>`;
+  html+=`</div>`;
+  recs.forEach(r=>{
+    let cls=r.priority==='High'?'High':r.priority==='Medium'?'Medium':'Routine';
+    html+=`<div class="ai-rec ${cls}" style="margin-bottom:6px"><strong>${escHtml(r.action)}</strong><div style="font-size:11px;margin-top:3px;opacity:.85">${escHtml(r.reason||'')}</div></div>`;
+  });
+  panel.innerHTML=html;
+}
 
+// ─── Helpers ────────────────────────────────────────
+function chip(level,label){
+  let tone={Safe:'safe','Low Risk':'low',Moderate:'mod','High Risk':'high',Critical:'crit'}[level]||'safe';
+  return `<span class="chip ${tone}">${label||level}</span>`;
+}
+function toneClass(level){return{Safe:'safe','Low Risk':'low',Moderate:'mod','High Risk':'high',Critical:'crit'}[level]||'safe'}
+function scoreFillClass(score){if(score<=1)return'tf-safe';if(score<=2)return'tf-low';if(score<=3)return'tf-mod';if(score<=4)return'tf-high';return'tf-crit'}
+function fmtMin(m){m=Math.round(m);let h=Math.floor(m/60),r=m%60;return h?`${h}h ${r}m`:`${r} min`}
+function fmtNum(v,d=2){return typeof v==='number'?v.toFixed(d):String(v??'—')}
+function escHtml(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function toast(msg,type='info'){
+  let el=document.getElementById('toast');el.textContent=msg;
+  el.style.background=type==='error'?'var(--crit)':type==='success'?'var(--safe)':'var(--text)';
+  el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3200);
+}
+function updateBackendBadge(connected){
+  let el=document.getElementById('healthBackend');
+  if(el)el.innerHTML=connected
+    ?'<span style="color:var(--safe);font-weight:700">✓ Connected to Flask backend (localhost:5000)</span> — Live data active. Patient data from app.py.'
+    :'<span style="color:var(--mod);font-weight:700">⚠ Demo mode</span> — Flask backend at localhost:5000 not reachable. Run <code style="font-family:var(--mono)">python app.py</code> to connect live data.';
+}
+function updateSysStatusBadge(){
+  let ss=state.systemStatus;if(!ss)return;
+  let el=document.getElementById('sysStatusBadge'),txt=document.getElementById('sysStatusText');
+  if(ss.system_status==='Alert'){el.className='sbadge alert';txt.textContent='⚠ Alert'}
+  else if(ss.system_status==='Elevated'){el.className='sbadge elev';txt.textContent='↑ Elevated'}
+  else{el.className='sbadge ok';txt.textContent='✓ Normal'}
+  let nb=document.getElementById('navBadge');
+  if(nb){let c=ss.critical_count||0;nb.textContent=c;nb.style.display=c>0?'':'none'}
+  let hs=document.getElementById('healthSummary');
+  if(hs)hs.innerHTML=[
+    ['Total Patients',ss.total_patients],['Critical Count',ss.critical_count],
+    ['System Status',ss.system_status],['Avg Risk',fmtNum(ss.average_risk,2)],
+    ['Data Source',usingDemo?'Demo (Offline)':'Flask Backend'],
+    ['Uptime',ss.uptime||'—'],
+    ['Last Update',new Date().toLocaleTimeString('en-IN')]
+  ].map(([k,v])=>`<div class="hitem"><span class="hkey">${k}</span><span class="hval">${v}</span></div>`).join('');
+}
+function populateSelects(){
+  let pts=state.patients;
+  let opts='<option value="">-- Select Patient --</option>'+pts.map(p=>`<option value="${p.id}">${escHtml(p.name)} (${p.ward||'—'})</option>`).join('');
+  ['monitorSelect','heatmapSelect','quickPatientDropdown'].forEach(id=>{
+    let el=document.getElementById(id);if(el){let v=el.value;el.innerHTML=opts;el.value=v}
+  });
+}
+
+// ─── Render Dashboard ──────────────────────────────
+function renderDashboard(){
+  let pts=state.patients;
+  document.getElementById('statTotal').textContent=pts.length;
+  document.getElementById('statHigh').textContent=pts.filter(p=>p.risk_score>=3&&p.risk_score<4).length;
+  document.getElementById('statCritical').textContent=pts.filter(p=>p.risk_score>=4).length;
+  let avg=pts.length?Math.round(pts.reduce((s,p)=>s+p.risk_score,0)/pts.length*100)/100:0;
+  let avgEl=document.getElementById('statAvg');avgEl.textContent=fmtNum(avg,2);avgEl.className='sv '+toneClass(pts[0]?.risk_level||'Safe');
+
+  // Sidebar priority
+  let top=pts[0];
+  if(top){
+    document.getElementById('sbPriorityName').textContent=top.name;
+    document.getElementById('sbPriorityDesc').textContent=`${top.ward||'—'} | Braden: ${top.braden_score} | Score: ${fmtNum(top.risk_score,2)}`;
+    document.getElementById('priorityName').textContent=top.name;
+    document.getElementById('priorityMeta').textContent=`Ward ${top.ward||'—'}, Bed ${top.bed||'—'} · ${top.primary_condition||'—'} · Braden ${top.braden_score}/23`;
+    document.getElementById('priorityAdvice').textContent=top.recommended_actions?.length?top.recommended_actions.map(a=>a.action).join(' · '):top.alerts[0]||'Continue monitoring.';
+    document.getElementById('priorityChip').innerHTML=chip(top.risk_level);
+    let pred2h=computePatient({...top,immobile_time:(+top.immobile_time||0)+120});
+    let pred=document.getElementById('priorityPrediction');pred.className='chip '+toneClass(pred2h.risk_level);pred.textContent=`+2h: ${pred2h.risk_level} (${fmtNum(pred2h.risk_score,2)})`;
+    document.getElementById('priorityOpenBtn').onclick=()=>openDetailsModal(top.id);
+    document.getElementById('priorityMonitorBtn').onclick=()=>goMonitor(top.id);
+    document.getElementById('priorityRepositionBtn').onclick=()=>quickReposById(top.id);
+  }
+
+  // Patient table
+  let tbody=document.getElementById('patientTableBody');
+  if(!pts.length){tbody.innerHTML='<tr><td colspan="8" style="padding:24px;text-align:center;color:var(--muted)">No patients loaded</td></tr>';return}
+  tbody.innerHTML=pts.map((p,i)=>{
+    // FIXED: Braden scale 6–23 mapped to 0–100% correctly
+    let bradenPct=Math.max(0,Math.min(100,Math.round((p.braden_score-6)/17*100)));
+    let toneColor=toneClass(p.risk_level);
+    let barColor=toneColor==='safe'?'var(--safe)':toneColor==='low'?'var(--low)':toneColor==='mod'?'var(--mod)':toneColor==='high'?'var(--high)':'var(--crit)';
+    return`<tr class="${i===0?'prow':''}">
+      <td><span class="mono" style="font-size:15px;font-weight:700">#${i+1}</span></td>
+      <td>
+        <button class="pbtn" onclick="openDetailsModal('${p.id}')">${escHtml(p.name)}</button>
+        <div class="psub">${escHtml(p.ward||'—')} / ${escHtml(p.bed||'—')} · ${escHtml(p.primary_condition||'—')}</div>
+      </td>
+      <td>${chip(p.risk_level)}</td>
+      <td class="mono" style="font-size:15px;font-weight:700;color:${p.risk_color||'var(--text)'}">${fmtNum(p.risk_score,2)}</td>
+      <td>
+        <div class="mono" style="font-size:14px;font-weight:700">${p.braden_score}</div>
+        <div class="progress-bg">
+          <div class="progress-fill" style="width:${bradenPct}%;background:${barColor}"></div>
+        </div>
+      </td>
+      <td class="mono">${fmtNum(+p.pressure,0)} mmHg</td>
+      <td class="mono">${fmtMin(+p.immobile_time||0)}</td>
+      <td>
+        <div class="btn-group">
+          <button class="btn btn-xs btn-secondary" onclick="goMonitor('${p.id}')">Monitor</button>
+          <button class="btn btn-xs btn-success" onclick="quickReposById('${p.id}')">↩</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  // Ward alerts
+  let allAlerts=pts.flatMap(p=>p.alerts.map(a=>({...p,alert:a}))).slice(0,6);
+  document.getElementById('wardAlerts').innerHTML=allAlerts.length
+    ?allAlerts.map(x=>`<div class="ai ${toneClass(x.risk_level)}"><div class="ai-name">${escHtml(x.name)}: ${escHtml(x.alert)}</div><div class="ai-copy">Priority #${x.priority} · Score ${fmtNum(x.risk_score,2)}</div></div>`).join('')
+    :'<div class="ai safe"><div class="ai-name">No active alerts</div></div>';
+
+  // Burden
+  let totalRisk=pts.reduce((s,p)=>s+p.risk_score,0);
+  document.getElementById('wardBurdenTotal').textContent=fmtNum(totalRisk,2);
+  document.getElementById('wardBurdenReduced').textContent=fmtNum(totalRisk*0.8,2)+' (−20%)';
+}
+
+// ─── Render Monitoring ─────────────────────────────
+async function renderMonitoring(){
+  let pid=state.selectedMonitorId,p=state.patients.find(x=>x.id===pid);
+  let empty=document.getElementById('monitorEmpty'),panel=document.getElementById('monitorPanel');
+  if(!p){empty.style.display='';panel.style.display='none';return}
+  empty.style.display='none';panel.style.display='flex';
+
+  document.getElementById('monRiskScore').textContent=fmtNum(p.risk_score,2);
+  document.getElementById('monRiskScore').style.color=p.risk_color||'var(--text)';
+  document.getElementById('monRiskBar').style.width=Math.round(p.risk_score/5*100)+'%';
+  document.getElementById('monRiskBar').className='sbf '+scoreFillClass(p.risk_score);
+  document.getElementById('monRiskChip').innerHTML=chip(p.risk_level);
+
+  // FIXED: Braden bar — low score = high risk bar; maps 6–23 → display 0–100% (inverted so 6=100% bar, 23=0%)
+  let bradenPct=Math.max(0,Math.min(100,Math.round((p.braden_score-6)/17*100)));
+  let bradenRiskPct=100-bradenPct; // invert: lower Braden = higher risk bar
+  document.getElementById('monBradenScore').textContent=p.braden_score;
+  document.getElementById('monBradenBar').style.width=bradenRiskPct+'%';
+  // Color bar by braden severity (lower = more critical)
+  let bTone=p.braden_score>=19?'tf-safe':p.braden_score>=15?'tf-low':p.braden_score>=13?'tf-mod':p.braden_score>=10?'tf-high':'tf-crit';
+  document.getElementById('monBradenBar').className='sbf '+bTone;
+  document.getElementById('monBradenLabel').textContent=(p.braden_score>=19?'Low concern':p.braden_score>=15?'Mild concern':p.braden_score>=13?'Moderate concern':p.braden_score>=10?'High concern':'Very high concern')+` (${p.braden_score}/23)`;
+
+  let pred2h=computePatient({...p,immobile_time:(+p.immobile_time||0)+120});
+  document.getElementById('monPredicted').textContent=fmtNum(pred2h.risk_score,2);
+  document.getElementById('monPredicted').style.color=pred2h.risk_color||'var(--text)';
+  document.getElementById('monPredictedText').textContent=`In 2h: ${pred2h.risk_level}. ${pred2h.risk_score>p.risk_score?'⚠ Risk will increase.':'Risk stable or lower.'}`;
+  document.getElementById('monHotspot').textContent=p.hotspot_region||'—';
+
+  let metrics=[
+    {label:'Pressure',value:fmtNum(+p.pressure,0)+' mmHg',note:'Interface pressure'},
+    {label:'Humidity',value:fmtNum(+p.humidity,0)+'%',note:`M factor: ${fmtNum(p.M_factor,3)}`},
+    {label:'Temperature',value:fmtNum(+p.temperature,1)+'°C',note:'Body temp'},
+    {label:'Bed Angle',value:fmtNum(+p.bed_angle,0)+'°',note:`H factor: ${fmtNum(p.H_factor,3)}`},
+    {label:'Immobile',value:fmtMin(+p.immobile_time||0),note:`T factor: ${fmtNum(p.T_factor,3)}`},
+    {label:'Source',value:usingDemo?'Demo':'Live',note:usingDemo?'Offline mode':'Backend live'},
+  ];
+  document.getElementById('monMetrics').innerHTML=metrics.map(m=>`<div class="mc"><div class="ml">${escHtml(m.label)}</div><div class="mv">${escHtml(m.value)}</div><div class="mn">${escHtml(m.note)}</div></div>`).join('');
+
+  // ALWAYS VISIBLE Formula display
+  let fd=document.getElementById('formulaDisplay');
+  if(fd)fd.textContent=`B(${fmtNum(p.B,3)}) × P(${fmtNum(p.P_factor,3)}) × T(${fmtNum(p.T_factor,3)}) × M(${fmtNum(p.M_factor,3)}) × H(${fmtNum(p.H_factor,3)}) = ${fmtNum(p.r_raw,3)} → softCap → ${fmtNum(p.risk_score,2)}`;
+
+  // Factor breakdown
+  let c=p.contributions||{};
+  let factorNames={B:'B — Braden Vulnerability',P:'P — Pressure Multiplier',T:'T — Time Multiplier',M:'M — Moisture Multiplier',H:'H — Shear/Angle Multiplier'};
+  let factorVals={B:p.B,P:p.P_factor,T:p.T_factor,M:p.M_factor,H:p.H_factor};
+  document.getElementById('factorList').innerHTML=Object.entries(c).map(([k,v])=>{
+    let pct=Math.round(v*100),tone=pct>=25?toneClass(p.risk_level):'safe';
+    let fval=fmtNum(factorVals[k],3);
+    return`<div class="fr"><div class="fh"><span style="color:var(--text2)">${factorNames[k]||k}</span><span class="mono" style="font-size:11.5px">val=${fval} · ${pct}%${pct>=25?' ⚠':''}</span></div><div class="track"><div class="tf tf-${tone}" style="width:${Math.min(100,pct*4)}%"></div></div></div>`;
+  }).join('');
+  document.getElementById('monRiskExplain').textContent=p.recommended_actions?.length?'Dominant factors: '+p.recommended_actions.map(a=>a.factor).join(', '):'All factors within safe range.';
+
+  if(currentMode==='advanced'){
+    document.getElementById('bradenBreakdown').style.display='block';
+    let bItems=[{name:'Sensory',val:p.sensory},{name:'Moisture',val:p.moisture_score},{name:'Activity',val:p.activity},{name:'Mobility',val:p.mobility},{name:'Nutrition',val:p.nutrition},{name:'Friction',val:p.friction}];
+    document.getElementById('bradenGrid').innerHTML=bItems.map(b=>`<div class="bi"><div class="bin">${b.name}</div><div class="biv">${b.val||'—'}</div></div>`).join('');
+  }else{document.getElementById('bradenBreakdown').style.display='none'}
+
+  document.getElementById('monAlerts').innerHTML=p.alerts.map((a,i)=>`<div class="ai ${i===0&&p.risk_score>=3?toneClass(p.risk_level):'mod'}"><div class="ai-name">${escHtml(a)}</div></div>`).join('')||'<div class="ai safe"><div class="ai-name">No active alerts</div></div>';
+
+  let timeline=[1,2,4,6].map(h=>{let pred=computePatient({...p,immobile_time:(+p.immobile_time||0)+h*60});return{h,score:pred.risk_score,level:pred.risk_level,tone:toneClass(pred.risk_level)}});
+  document.getElementById('predTimeline').innerHTML=timeline.map(t=>`<div class="ti"><div class="tih">+${t.h}h</div>${chip(t.level)}<div class="tiscore" style="color:${t.tone==='crit'?'var(--crit)':t.tone==='high'?'var(--high)':t.tone==='mod'?'var(--mod)':t.tone==='low'?'var(--low)':'var(--safe)'};margin-top:5px">${fmtNum(t.score,2)}</div></div>`).join('');
+
+  let hist=await loadHistory(pid);
+  document.getElementById('historyList').innerHTML=hist.length
+    ?[...hist].reverse().slice(0,6).map(e=>`<div class="hist-item"><div class="hist-act">${escHtml(e.action||'—')}</div><div class="hist-meta"><span>${new Date(e.timestamp).toLocaleString('en-IN')}</span><span>Nurse: ${escHtml(e.nurse||'—')}</span></div>${e.risk_score!=null?`<div class="hist-chg" style="color:${(e.risk_change||0)<0?'var(--safe)':(e.risk_change||0)>0?'var(--high)':'var(--muted)'}">Score: ${fmtNum(e.risk_score,2)} (${(e.risk_change||0)>=0?'+':''}${fmtNum(e.risk_change||0,3)})</div>`:''}${e.remarks?`<div style="font-size:11px;color:var(--muted)">${escHtml(e.remarks)}</div>`:''}</div>`).join('')
+    :'<div class="empty" style="padding:14px"><div class="empty-txt">No history yet</div></div>';
+
+  renderPressureDiagram(p);
+}
+
+// ─── Pressure Diagram ──────────────────────────────
+function pressureColor(v){if(v<20)return'#22c55e';if(v<50)return'#86efac';if(v<80)return'#eab308';if(v<110)return'#f97316';if(v<150)return'#ef4444';return'#7f1d1d'}
+function pressureOpacity(v){return Math.max(0.15,Math.min(1,v/130))}
+function renderPressureDiagram(p){
+  let isSitting=(+p.bed_angle||0)>45;
+  document.getElementById('diagramPostureLabel').textContent=isSitting?'🪑 Sitting Position (>45°)':'🛏️ Supine / Semi-Fowler';
+  let pchip=document.getElementById('diagramPostureChip');
+  pchip.className='chip '+(isSitting?'mod':'safe');pchip.textContent=isSitting?'Sitting':'Supine';
+  let grid=p.sensor_grid||generateSensorGrid(+p.pressure||50,+p.bed_angle||30,+p.immobile_time||0);
+  document.getElementById('bodySvgWrap').innerHTML=buildBodySVG(grid,isSitting,p);
+  document.getElementById('bedSvgWrap').innerHTML=buildBedSVG(grid,isSitting);
+  let topPts=[...grid].sort((a,b)=>b.value-a.value).slice(0,3);
+  document.getElementById('ppLegend').innerHTML=topPts.map(pt=>`<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px"><div style="width:8px;height:8px;border-radius:2px;background:${pressureColor(pt.value)};flex-shrink:0"></div><div style="font-size:10px;font-weight:700;color:var(--text2)">${pt.region}<br><span style="color:var(--muted);font-weight:500">${Math.round(pt.value)} mmHg</span></div></div>`).join('');
+}
+function buildBodySVG(grid,isSitting,p){
+  let rowColors=[];
+  for(let r=0;r<6;r++){
+    let cells=grid.filter(c=>c.row===r);
+    let maxVal=cells.reduce((m,c)=>Math.max(m,c.value),0);
+    let active=isSitting?r>=3:true;
+    rowColors.push({color:active?pressureColor(maxVal):'#9ca3af',opacity:active?Math.max(0.2,pressureOpacity(maxVal)):0.15,value:maxVal,active});
+  }
+  let w=160,h=320;
+  let svg=`<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:300px"><defs><filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`;
+  if(!isSitting){
+    let hc=rowColors[0];
+    svg+=`<ellipse cx="80" cy="25" rx="20" ry="22" fill="${hc.color}" fill-opacity="${hc.opacity}" stroke="${hc.color}" stroke-width="2"/>`;
+    svg+=`<rect x="73" y="45" width="14" height="12" rx="4" fill="${rowColors[1].color}" fill-opacity="${rowColors[1].opacity*0.7}"/>`;
+    let sc=rowColors[1];
+    svg+=`<ellipse cx="35" cy="68" rx="18" ry="12" fill="${sc.color}" fill-opacity="${sc.opacity}" stroke="${sc.color}" stroke-width="${sc.active?1.5:1}"/>`;
+    svg+=`<ellipse cx="125" cy="68" rx="18" ry="12" fill="${sc.color}" fill-opacity="${sc.opacity}" stroke="${sc.color}" stroke-width="${sc.active?1.5:1}"/>`;
+    svg+=`<rect x="50" y="57" width="60" height="24" rx="8" fill="${sc.color}" fill-opacity="${sc.opacity}"/>`;
+    let uc=rowColors[2];
+    svg+=`<rect x="45" y="80" width="70" height="55" rx="10" fill="${uc.color}" fill-opacity="${uc.opacity}" stroke="${uc.color}" stroke-width="1.5"/>`;
+    svg+=`<line x1="35" y1="72" x2="30" y2="145" stroke="${rowColors[2].color}" stroke-opacity="${rowColors[2].opacity+0.2}" stroke-width="18" stroke-linecap="round"/>`;
+    svg+=`<line x1="125" y1="72" x2="130" y2="145" stroke="${rowColors[2].color}" stroke-opacity="${rowColors[2].opacity+0.2}" stroke-width="18" stroke-linecap="round"/>`;
+    let lc=rowColors[3];
+    svg+=`<rect x="50" y="134" width="60" height="40" rx="8" fill="${lc.color}" fill-opacity="${lc.opacity}" stroke="${lc.color}" stroke-width="1.5"/>`;
+    let hips=rowColors[4];
+    svg+=`<rect x="46" y="172" width="68" height="40" rx="12" fill="${hips.color}" fill-opacity="${hips.opacity}" stroke="${hips.color}" stroke-width="${hips.active?2:1}"/>`;
+    if(hips.active&&hips.value>50)svg+=`<ellipse cx="80" cy="192" rx="28" ry="16" fill="${hips.color}" fill-opacity="0.35" filter="url(#glow)"/>`;
+    svg+=`<rect x="53" y="210" width="28" height="60" rx="10" fill="${rowColors[5].color}" fill-opacity="${rowColors[5].opacity}"/>`;
+    svg+=`<rect x="79" y="210" width="28" height="60" rx="10" fill="${rowColors[5].color}" fill-opacity="${rowColors[5].opacity}"/>`;
+    let hc2=rowColors[5];
+    svg+=`<ellipse cx="67" cy="272" rx="13" ry="8" fill="${hc2.color}" fill-opacity="${hc2.opacity+0.1}" stroke="${hc2.color}" stroke-width="${hc2.active?2:1}"/>`;
+    svg+=`<ellipse cx="93" cy="272" rx="13" ry="8" fill="${hc2.color}" fill-opacity="${hc2.opacity+0.1}" stroke="${hc2.color}" stroke-width="${hc2.active?2:1}"/>`;
+    if(rowColors[4].active&&rowColors[4].value>60)svg+=`<circle cx="80" cy="192" r="6" fill="${rowColors[4].color}" fill-opacity="0.9" filter="url(#glow)"><animate attributeName="r" values="5;8;5" dur="2s" repeatCount="indefinite"/></circle>`;
+    if(rowColors[5].active&&rowColors[5].value>50){svg+=`<circle cx="67" cy="272" r="5" fill="${rowColors[5].color}" fill-opacity="0.9" filter="url(#glow)"><animate attributeName="r" values="4;7;4" dur="2.5s" repeatCount="indefinite"/></circle>`;svg+=`<circle cx="93" cy="272" r="5" fill="${rowColors[5].color}" fill-opacity="0.9" filter="url(#glow)"><animate attributeName="r" values="4;7;4" dur="2.5s" repeatCount="indefinite"/></circle>`;}
+    if(rowColors[1].active&&rowColors[1].value>55){svg+=`<circle cx="38" cy="65" r="5" fill="${rowColors[1].color}" fill-opacity="0.9" filter="url(#glow)"><animate attributeName="r" values="4;7;4" dur="1.8s" repeatCount="indefinite"/></circle>`;svg+=`<circle cx="122" cy="65" r="5" fill="${rowColors[1].color}" fill-opacity="0.9" filter="url(#glow)"><animate attributeName="r" values="4;7;4" dur="1.8s" repeatCount="indefinite"/></circle>`;}
+  }else{
+    svg+=`<ellipse cx="80" cy="28" rx="20" ry="22" fill="${rowColors[0].color}" fill-opacity="${rowColors[0].opacity}" stroke="${rowColors[0].color}" stroke-width="2"/>`;
+    svg+=`<rect x="73" y="48" width="14" height="14" rx="4" fill="${rowColors[1].color}" fill-opacity="0.5"/>`;
+    svg+=`<ellipse cx="38" cy="70" rx="16" ry="10" fill="${rowColors[1].color}" fill-opacity="${rowColors[1].opacity}"/>`;
+    svg+=`<ellipse cx="122" cy="70" rx="16" ry="10" fill="${rowColors[1].color}" fill-opacity="${rowColors[1].opacity}"/>`;
+    svg+=`<rect x="50" y="62" width="60" height="18" rx="8" fill="${rowColors[1].color}" fill-opacity="${rowColors[1].opacity}"/>`;
+    svg+=`<rect x="48" y="80" width="64" height="80" rx="12" fill="${rowColors[2].color}" fill-opacity="${rowColors[2].opacity}"/>`;
+    svg+=`<rect x="26" y="80" width="18" height="60" rx="8" fill="${rowColors[2].color}" fill-opacity="${rowColors[2].opacity*0.7}"/>`;
+    svg+=`<rect x="116" y="80" width="18" height="60" rx="8" fill="${rowColors[2].color}" fill-opacity="${rowColors[2].opacity*0.7}"/>`;
+    let hips=rowColors[4];
+    svg+=`<rect x="40" y="158" width="80" height="38" rx="14" fill="${hips.color}" fill-opacity="${Math.min(1,hips.opacity+0.15)}" stroke="${hips.color}" stroke-width="2"/>`;
+    if(hips.value>60){svg+=`<ellipse cx="58" cy="177" rx="16" ry="14" fill="${hips.color}" fill-opacity="0.4" filter="url(#glow)"/>`;svg+=`<ellipse cx="102" cy="177" rx="16" ry="14" fill="${hips.color}" fill-opacity="0.4" filter="url(#glow)"/>`;}
+    svg+=`<rect x="32" y="194" width="38" height="28" rx="8" fill="${rowColors[3].color}" fill-opacity="${rowColors[3].opacity}"/>`;
+    svg+=`<rect x="90" y="194" width="38" height="28" rx="8" fill="${rowColors[3].color}" fill-opacity="${rowColors[3].opacity}"/>`;
+    svg+=`<rect x="36" y="220" width="28" height="70" rx="8" fill="${rowColors[5].color}" fill-opacity="${rowColors[5].opacity}"/>`;
+    svg+=`<rect x="96" y="220" width="28" height="70" rx="8" fill="${rowColors[5].color}" fill-opacity="${rowColors[5].opacity}"/>`;
+    svg+=`<ellipse cx="50" cy="292" rx="16" ry="8" fill="${rowColors[5].color}" fill-opacity="${rowColors[5].opacity+0.1}"/>`;
+    svg+=`<ellipse cx="110" cy="292" rx="16" ry="8" fill="${rowColors[5].color}" fill-opacity="${rowColors[5].opacity+0.1}"/>`;
+    if(hips.active&&hips.value>50){svg+=`<circle cx="58" cy="177" r="7" fill="${hips.color}" fill-opacity="0.95" filter="url(#glow)"><animate attributeName="r" values="6;10;6" dur="1.6s" repeatCount="indefinite"/></circle>`;svg+=`<circle cx="102" cy="177" r="7" fill="${hips.color}" fill-opacity="0.95" filter="url(#glow)"><animate attributeName="r" values="6;10;6" dur="1.6s" repeatCount="indefinite"/></circle>`;}
+    if(rowColors[5].active&&rowColors[5].value>40){svg+=`<circle cx="50" cy="292" r="5" fill="${rowColors[5].color}" fill-opacity="0.9"><animate attributeName="r" values="4;7;4" dur="2s" repeatCount="indefinite"/></circle>`;svg+=`<circle cx="110" cy="292" r="5" fill="${rowColors[5].color}" fill-opacity="0.9"><animate attributeName="r" values="4;7;4" dur="2s" repeatCount="indefinite"/></circle>`;}
+  }
+  svg+='</svg>';return svg;
+}
+function buildBedSVG(grid,isSitting){
+  let w=180,h=300;
+  let svg=`<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:280px">`;
+  svg+=`<rect x="10" y="10" width="${w-20}" height="${h-20}" rx="12" fill="none" stroke="var(--border2)" stroke-width="2"/>`;
+  svg+=`<rect x="10" y="10" width="${w-20}" height="32" rx="12" fill="var(--bg2)" stroke="var(--border2)" stroke-width="1"/>`;
+  svg+=`<text x="${w/2}" y="30" text-anchor="middle" font-size="10" font-weight="700" fill="var(--muted)" font-family="DM Sans,sans-serif">HEAD</text>`;
+  let rows=6,cols=3,cellW=44,cellH=40;
+  let startX=Math.round((w-cols*cellW-(cols-1)*4)/2)+2,startY=46;
+  for(let r=0;r<rows;r++){for(let c=0;c<cols;c++){
+    let s=grid.find(x=>x.row===r&&x.col===c)||{value:0,active:true};
+    let active=isSitting?r>=3:true;
+    let color=active?pressureColor(s.value):'#9ca3af';
+    let opacity=active?Math.max(0.25,pressureOpacity(s.value)):0.2;
+    let x=startX+c*(cellW+4),y=startY+r*(cellH+4);
+    svg+=`<rect x="${x}" y="${y}" width="${cellW}" height="${cellH}" rx="6" fill="${color}" fill-opacity="${opacity}" stroke="${color}" stroke-opacity="${opacity+0.1}" stroke-width="1.5"/>`;
+    if(active){
+      svg+=`<text x="${x+cellW/2}" y="${y+cellH/2+4}" text-anchor="middle" font-size="10" font-weight="600" fill="white" fill-opacity="0.9" font-family="DM Mono,monospace">${Math.round(s.value)}</text>`;
+      if(s.value>80)svg+=`<rect x="${x}" y="${y}" width="${cellW}" height="${cellH}" rx="6" fill="${color}" fill-opacity="0.2"><animate attributeName="fill-opacity" values="0.1;0.35;0.1" dur="1.8s" repeatCount="indefinite"/></rect>`;
+    }
+  }}
+  svg+=`<text x="${w/2}" y="${startY+rows*(cellH+4)+12}" text-anchor="middle" font-size="10" font-weight="700" fill="var(--muted)" font-family="DM Sans,sans-serif">FEET</text>`;
+  svg+='</svg>';return svg;
+}
+
+// ─── Render Heatmap ────────────────────────────────
+function renderHeatmap(patientId){
+  let p=state.patients.find(x=>x.id===patientId);
+  let empty=document.getElementById('heatmapEmpty'),panel=document.getElementById('heatmapPanel');
+  if(!p){empty.style.display='';panel.style.display='none';return}
+  empty.style.display='none';panel.style.display='flex';
+  document.getElementById('heatmapPatientInfo').textContent=`${p.name} — ${p.ward||'—'}, Bed ${p.bed||'—'}`;
+  document.getElementById('heatmapChip').innerHTML=chip(p.risk_level,`Score: ${fmtNum(p.risk_score,2)}`);
+  let isSitting=(+p.bed_angle||0)>45;
+  document.getElementById('heatmapPostureInfo').textContent=isSitting?'🪑 Sitting — Ischial pressure dominant':'🛏️ Lying — Sacral/back pressure dominant';
+  document.getElementById('postureChip').textContent=isSitting?'Sitting (>45°)':'Supine / Semi-Fowler';
+  document.getElementById('postureChip').className='chip '+(isSitting?'mod':'safe');
+  let sc=v=>{if(v<20)return'#22c55e';if(v<50)return'#86efac';if(v<80)return'#eab308';if(v<110)return'#f97316';if(v<150)return'#ef4444';return'#7f1d1d'};
+  let grid=p.sensor_grid||generateSensorGrid(+p.pressure||50,+p.bed_angle||30,+p.immobile_time||0);
+  let backGrid=grid.map(s=>({...s,value:Math.max(0,Math.round(s.value*(0.7+Math.random()*0.5)))}));
+  function renderGrid(gridData,domId,sitting){
+    let cells='';
+    for(let r=0;r<6;r++)for(let c=0;c<3;c++){
+      let s=gridData.find(x=>x.row===r&&x.col===c)||{value:0,region:'',active:true};
+      let active=sitting?r>=3:true;
+      let bg=active?sc(s.value):'#9ca3af';
+      cells+=`<div class="sc${active?'':' inactive'}" style="background:${bg}">${active?Math.round(s.value):'—'}<div class="sc-tt">${s.region||''} ${active?Math.round(s.value)+' mmHg':'Inactive'}</div></div>`;
+    }
+    document.getElementById(domId).innerHTML=cells;
+  }
+  renderGrid(grid,'sensorGridFront',isSitting);
+  renderGrid(backGrid,'sensorGridBack',false);
+  let regionLabels=['Head','Shoulders','Upper Back','Lower Back','Sacrum/Coccyx','Heels'];
+  document.getElementById('regionLabels').innerHTML=regionLabels.map(r=>`<div style="padding:2px 0;border-bottom:1px solid var(--border);font-size:10.5px">${r}</div>`).join('');
+  let sorted=[...grid].sort((a,b)=>b.value-a.value).slice(0,4);
+  document.getElementById('hotZonesList').innerHTML=sorted.map((s,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:5px;background:var(--bg);border:1px solid var(--border)"><span style="width:9px;height:9px;border-radius:2px;background:${sc(s.value)};flex-shrink:0"></span><span style="font-size:12.5px;font-weight:700;flex:1">${s.region}</span><span class="mono" style="font-size:12px">${Math.round(s.value)} mmHg</span>${i===0?'<span class="chip high" style="font-size:9.5px">⚠ MAX</span>':''}</div>`).join('');
+}
+
+// ─── Modal ─────────────────────────────────────────
+function openDetailsModal(patientId){
+  let pid=patientId||(state.selectedQuickId)||(state.patients[0]||{}).id;
+  if(!pid)return;state.openModalId=pid;
+  let p=state.patients.find(x=>x.id===pid);if(!p)return;
+  document.getElementById('modalName').textContent=p.name;
+  document.getElementById('modalMeta').textContent=`Age ${p.age||'—'} · ${p.ward||'—'}, Bed ${p.bed||'—'} · ${p.primary_condition||'—'} · ${p.attended_by||'—'}`;
+  document.getElementById('modalScore').textContent=fmtNum(p.risk_score,2);
+  document.getElementById('modalScore').style.color=p.risk_color||'var(--text)';
+  document.getElementById('modalScoreBar').style.width=Math.round(p.risk_score/5*100)+'%';
+  document.getElementById('modalScoreBar').className='sbf '+scoreFillClass(p.risk_score);
+  document.getElementById('modalChip').innerHTML=chip(p.risk_level)+' · Braden: '+p.braden_score+'/23';
+  let c=p.contributions||{};let fn={B:'Braden (B)',P:'Pressure (P)',T:'Time (T)',M:'Moisture (M)',H:'Shear (H)'};
+  document.getElementById('modalFactors').innerHTML=Object.entries(c).map(([k,v])=>`<div class="fr" style="padding:9px 11px"><div class="fh"><span>${fn[k]||k}</span><span class="mono" style="font-size:11px">${Math.round(v*100)}%${v>=0.25?' ⚠':''}</span></div><div class="track"><div class="tf tf-${v>=0.25?toneClass(p.risk_level):'safe'}" style="width:${Math.min(100,v*400)}%"></div></div></div>`).join('');
+  document.getElementById('modalActions').innerHTML=(p.recommended_actions||[]).length?p.recommended_actions.map(a=>`<div class="ai high"><div class="ai-name">Factor ${a.factor}: ${escHtml(a.action)}</div><div class="ai-copy">Contribution: ${Math.round(a.contribution*100)}%</div></div>`).join(''):'<div class="ai safe"><div class="ai-name">No significant risk factors</div></div>';
+  let dets=[['Risk Score',`${fmtNum(p.risk_score,2)} / 5.0`],['Risk Level',p.risk_level],['Braden',p.braden_score+'/23'],['Pressure',fmtNum(+p.pressure,0)+' mmHg'],['Humidity',fmtNum(+p.humidity,0)+'%'],['Temp',fmtNum(+p.temperature,1)+'°C'],['Bed Angle',fmtNum(+p.bed_angle,0)+'°'],['Immobile',fmtMin(+p.immobile_time||0)],['Hotspot',p.hotspot_region||'—']];
+  document.getElementById('modalDetails').innerHTML=dets.map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:6px 9px;border-radius:5px;background:var(--bg);border:1px solid var(--border)"><span style="color:var(--muted);font-weight:700">${escHtml(k)}</span><span class="mono">${escHtml(String(v))}</span></div>`).join('');
+  document.getElementById('detailsModal').hidden=false;
+}
+function closeModal(){document.getElementById('detailsModal').hidden=true;state.openModalId=null}
+function goMonitorFromModal(){let id=state.openModalId;closeModal();goMonitor(id)}
+async function treatFromModal(t){
+  if(!state.openModalId)return;
+  await doTreatmentAPI(state.openModalId,t);renderAll();openDetailsModal(state.openModalId);
+  toast(`✓ ${t.replace(/_/g,' ')} applied!`,'success');
+}
+
+// ─── Actions ───────────────────────────────────────
+function goMonitor(id){
+  let pid=id||(state.patients[0]||{}).id;
+  state.selectedMonitorId=pid;showPage('monitoring');
+  let ms=document.getElementById('monitorSelect');if(ms)ms.value=pid||'';
+  renderMonitoring();
+}
+function goMonitorFromSidebar(){let top=state.patients[0];if(!top)return;state.selectedMonitorId=top.id;showPage('monitoring');let ms=document.getElementById('monitorSelect');if(ms)ms.value=top.id;renderMonitoring()}
+function openDetailsForQuick(){openDetailsModal(state.selectedQuickId||(state.patients[0]||{}).id)}
+async function quickReposById(id){
+  if(!id)return;
+  let p=state.patients.find(x=>x.id===id);
+  let nurse=prompt(`Nurse name for ${p?.name||'patient'}:`,p?.attended_by||'Nurse');
+  if(nurse===null)return;
+  await doReposition(id,nurse);renderAll();
+  toast(`✓ ${p?.name} repositioned!`,'success');
+}
+function quickReposition(){quickReposById((state.patients[0]||{}).id)}
+function selectMonitorPatient(v){state.selectedMonitorId=v;renderMonitoring()}
+function selectQuickPatient(v){state.selectedQuickId=v}
+
+async function doTreatment(treatment){
+  let pid=state.selectedQuickId||(state.patients[0]||{}).id;
+  if(!pid){toast('Select a patient first','error');return}
+  let p=state.patients.find(x=>x.id===pid);
+  let prevScore=p?.risk_score||0;
+  await doTreatmentAPI(pid,treatment);
+  let updated=state.patients.find(x=>x.id===pid);
+  let delta=updated?(updated.risk_score-prevScore):0;
+  let keyMap={reposition:'qt-reposition',bedsheet_change:'qt-bedsheet',moisture_care:'qt-moisture',pressure_offload:'qt-offload',nutrition:'qt-nutrition'};
+  let resMap={reposition:'qtr-reposition',bedsheet_change:'qtr-bedsheet',moisture_care:'qtr-moisture',pressure_offload:'qtr-offload',nutrition:'qtr-nutrition'};
+  let btnEl=document.getElementById(keyMap[treatment]),resEl=document.getElementById(resMap[treatment]);
+  if(btnEl){btnEl.classList.add('applied');setTimeout(()=>btnEl.classList.remove('applied'),1200)}
+  if(resEl){resEl.textContent=delta<=0?`▼ ${Math.abs(delta).toFixed(2)}`:`▲ ${delta.toFixed(2)}`;resEl.style.color=delta<=0?'var(--safe)':'var(--high)';setTimeout(()=>resEl.textContent='',4000)}
+  renderAll();
+  toast(`✓ ${treatment.replace(/_/g,' ')} applied to ${p?.name||'patient'}!`,'success');
+}
+async function treatSelected(treatment){
+  let pid=state.selectedMonitorId;
+  if(!pid){toast('No patient selected','error');return}
+  let p=state.patients.find(x=>x.id===pid);
+  let prevScore=p?.risk_score||0;
+  await doTreatmentAPI(pid,treatment);
+  let updated=state.patients.find(x=>x.id===pid);
+  let delta=updated?(updated.risk_score-prevScore):0;
+  let keyMap={reposition:'mt-reposition',bedsheet_change:'mt-bedsheet',moisture_care:'mt-moisture',pressure_offload:'mt-offload',nutrition:'mt-nutrition'};
+  let resMap={reposition:'mtr-reposition',bedsheet_change:'mtr-bedsheet',moisture_care:'mtr-moisture',pressure_offload:'mtr-offload',nutrition:'mtr-nutrition'};
+  let btnEl=document.getElementById(keyMap[treatment]),resEl=document.getElementById(resMap[treatment]);
+  if(btnEl){btnEl.classList.add('applied');setTimeout(()=>btnEl.classList.remove('applied'),1200)}
+  if(resEl){resEl.textContent=delta<=0?`▼ ${Math.abs(delta).toFixed(2)}`:`▲ ${delta.toFixed(2)}`;resEl.style.color=delta<=0?'var(--safe)':'var(--high)';setTimeout(()=>resEl.textContent='',5000)}
+  let fb=document.getElementById('monTreatFeedback');
+  if(fb){
+    fb.textContent=delta<=0?`✓ ${treatment.replace(/_/g,' ')} applied — Score: ${fmtNum(updated?.risk_score,2)} (${delta.toFixed(3)})`:`⚠ ${treatment.replace(/_/g,' ')} — Score: ${fmtNum(updated?.risk_score,2)}`;
+    fb.style.background=delta<=0?'var(--safe-bg)':'var(--mod-bg)';fb.style.borderColor=delta<=0?'var(--safe-bd)':'var(--mod-bd)';fb.style.color=delta<=0?'var(--safe)':'var(--mod)';
+    fb.style.display='block';setTimeout(()=>fb.style.display='none',5000);
+  }
+  renderMonitoring();renderAll();
+  toast(`✓ ${treatment.replace(/_/g,' ')} → score ${fmtNum(updated?.risk_score,2)} (${delta>=0?'+':''}${delta.toFixed(3)})`,'success');
+}
+async function confirmDeletePatient(){
+  let pid=state.selectedMonitorId;if(!pid)return;
+  let p=state.patients.find(x=>x.id===pid);
+  if(!confirm(`Discharge ${p?.name}? This will remove them from the ward list.`))return;
+  if(!usingDemo){await apiFetch(`/patients/${pid}`,{method:'DELETE'});}
+  else{let idx=DEMO.findIndex(x=>x.id===pid);if(idx!==-1)DEMO.splice(idx,1);delete demoHistory[pid]}
+  state.selectedMonitorId=null;
+  await refreshAll();showPage('dashboard');
+  toast(`✓ ${p?.name} discharged`,'success');
+}
+
+// ─── Add Patient ───────────────────────────────────
+function updatePreview(){
+  let tmp={
+    sensory:+document.getElementById('sl_sensory').value,
+    moisture_score:+document.getElementById('sl_moisture').value,
+    activity:+document.getElementById('sl_activity').value,
+    mobility:+document.getElementById('sl_mobility').value,
+    nutrition:+document.getElementById('sl_nutrition').value,
+    friction:+document.getElementById('sl_friction').value,
+    pressure:+document.getElementById('fPressure').value||50,
+    humidity:+document.getElementById('fHumidity').value||55,
+    temperature:+document.getElementById('fTemp').value||37,
+    bed_angle:+document.getElementById('fAngle').value||20,
+    immobile_time:+document.getElementById('fTime').value||60,
+    sliding:document.getElementById('fSliding').value||'none'
+  };
+  let r=computePatient(tmp);
+  document.getElementById('prevScore').textContent=fmtNum(r.risk_score,2);
+  document.getElementById('prevScore').style.color=r.risk_color||'var(--text)';
+  document.getElementById('prevBar').style.width=Math.round(r.risk_score/5*100)+'%';
+  document.getElementById('prevBar').className='sbf '+scoreFillClass(r.risk_score);
+  document.getElementById('prevChip').innerHTML=chip(r.risk_level);
+  document.getElementById('prevBraden').textContent=r.braden_score;
+  document.getElementById('prevB').textContent=fmtNum(r.B,3);
+  document.getElementById('prevP').textContent=fmtNum(r.P_factor,3);
+  document.getElementById('prevT').textContent=fmtNum(r.T_factor,3);
+  document.getElementById('prevM').textContent=fmtNum(r.M_factor,3);
+  document.getElementById('prevH').textContent=fmtNum(r.H_factor,3);
+  let pf=document.getElementById('prevFormula');
+  if(pf)pf.textContent=`B(${fmtNum(r.B,3)}) × P(${fmtNum(r.P_factor,3)}) × T(${fmtNum(r.T_factor,3)}) × M(${fmtNum(r.M_factor,3)}) × H(${fmtNum(r.H_factor,3)}) = ${fmtNum(r.r_raw,3)} → ${fmtNum(r.risk_score,2)}`;
+  document.getElementById('prevRecommendations').innerHTML=r.recommended_actions.map(a=>`<div class="ai high" style="padding:8px 11px"><div class="ai-name" style="font-size:11.5px">Factor ${a.factor}: ${escHtml(a.action)}</div></div>`).join('')||'<div class="ai safe"><div class="ai-name">No significant risk factors</div></div>';
+}
+['fPressure','fHumidity','fTemp','fAngle','fTime'].forEach(id=>{let el=document.getElementById(id);if(el)el.addEventListener('input',updatePreview)});
+document.getElementById('fSliding').addEventListener('change',updatePreview);
+
+async function submitPatient(){
+  let name=document.getElementById('fName').value.trim(),age=document.getElementById('fAge').value;
+  if(!name||!age){showFormMsg('Name and age are required.','error');return}
+  let payload={
+    name,age:+age,
+    ward:document.getElementById('fWard').value||'General',
+    bed:document.getElementById('fBed').value||'',
+    contact:document.getElementById('fContact').value||'',
+    attended_by:document.getElementById('fNurse').value||'Unassigned',
+    primary_condition:document.getElementById('fCondition').value,
+    sliding:document.getElementById('fSliding').value,
+    sensory:+document.getElementById('sl_sensory').value,
+    moisture_score:+document.getElementById('sl_moisture').value,
+    activity:+document.getElementById('sl_activity').value,
+    mobility:+document.getElementById('sl_mobility').value,
+    nutrition:+document.getElementById('sl_nutrition').value,
+    friction:+document.getElementById('sl_friction').value,
+    severity:0,
+    nurse:document.getElementById('fNurse').value||'Admin'
+  };
+  let p=document.getElementById('fPressure').value;if(p)payload.pressure=+p;
+  let hu=document.getElementById('fHumidity').value;if(hu)payload.humidity=+hu;
+  let t=document.getElementById('fTemp').value;if(t)payload.temperature=+t;
+  let a=document.getElementById('fAngle').value;if(a)payload.bed_angle=+a;
+  let tm=document.getElementById('fTime').value;if(tm)payload.immobile_time=+tm;
+  if(!usingDemo){
+    // POST to app.py /api/add_patient
+    let res=await apiFetch('/add_patient',{method:'POST',body:JSON.stringify(payload)});
+    if(res&&!res.error){showFormMsg('✓ Patient added successfully!','success');resetForm();await refreshAll();return;}
+    else{showFormMsg(res?.error||'Could not reach backend. Adding in demo mode.','error');usingDemo=true;}
+  }
+  // Demo fallback
+  let tmp={id:'d'+Date.now(),pressure:50,humidity:55,temperature:37,bed_angle:20,immobile_time:60,sliding:'none',...payload};
+  DEMO.push(tmp);demoHistory[tmp.id]=[];
+  showFormMsg('✓ Patient added (demo mode).','success');resetForm();
+  await refreshAll();
+}
+function showFormMsg(msg,type){
+  let el=document.getElementById('formMsg');el.textContent=msg;el.style.display='block';
+  el.style.background=type==='error'?'var(--high-bg)':type==='success'?'var(--safe-bg)':'var(--bg)';
+  el.style.borderColor=type==='error'?'var(--high-bd)':type==='success'?'var(--safe-bd)':'var(--border)';
+  el.style.color=type==='error'?'var(--high)':type==='success'?'var(--safe)':'var(--text)';
+  setTimeout(()=>el.style.display='none',4000);
+}
+function resetForm(){
+  ['fName','fAge','fWard','fBed','fContact','fNurse','fPressure','fHumidity','fTemp','fAngle','fTime'].forEach(id=>{let el=document.getElementById(id);if(el)el.value=''});
+  ['sl_sensory','sl_moisture','sl_activity','sl_mobility','sl_nutrition'].forEach(id=>{document.getElementById(id).value=4;let sv=document.getElementById(id.replace('sl_','sv_'));if(sv)sv.textContent=4});
+  document.getElementById('sl_friction').value=3;document.getElementById('sv_friction').textContent=3;
+  updatePreview();
+}
+
+// ─── Simulate ──────────────────────────────────────
+async function simulateUpdate(){
+  if(!usingDemo){
+    let data=await apiFetch('/simulate_update',{method:'POST'});
+    if(data&&data.patients){
+      state.patients=data.patients.map(p=>computePatient(p)).sort((a,b)=>b.risk_score-a.risk_score);
+      state.patients.forEach((p,i)=>p.priority=i+1);
+      renderAll();toast('↻ Simulation complete (live)','success');return;
+    }
+  }
+  DEMO.forEach(p=>{
+    p.pressure=Math.max(5,Math.min(150,p.pressure+(Math.random()*20-8)));
+    p.humidity=Math.max(20,Math.min(100,p.humidity+(Math.random()*14-4)));
+    p.temperature=Math.max(35.5,Math.min(40,p.temperature+(Math.random()*0.8-0.3)));
+    p.bed_angle=Math.max(0,Math.min(80,p.bed_angle+(Math.random()*22-8)));
+    p.immobile_time+=10+Math.round(Math.random()*30);
+  });
+  state.patients=processDemoPatients();state.patients.forEach((p,i)=>p.priority=i+1);
+  renderAll();toast('↻ Simulation complete (demo)','success');
+}
+
+// ─── Refresh / Render ──────────────────────────────
+async function refreshAll(){
+  await loadPatients();await loadSystemStatus();
+  state.lastUpdated=new Date();
+  renderAll();
+  // Refresh global history on health page
+  let gh=document.getElementById('globalHistory');
+  if(gh){let hist=await loadGlobalHistory();gh.innerHTML=hist.length?hist.map(e=>`<div class="hist-item"><div class="hist-act">${escHtml(e.action||'—')}</div><div class="hist-meta"><span>${new Date(e.timestamp).toLocaleString('en-IN')}</span><span>Nurse: ${escHtml(e.nurse||'System')}</span></div>${e.remarks?`<div style="font-size:11px;color:var(--muted)">${escHtml(e.remarks)}</div>`:''}</div>`).join(''):'<div class="empty" style="padding:12px"><div class="empty-txt">No history</div></div>';}
+}
+function renderAll(){
+  populateSelects();renderDashboard();
+  if(state.selectedMonitorId)renderMonitoring();
+  let hp=document.getElementById('heatmapSelect')?.value;if(hp)renderHeatmap(hp);
+}
+
+// ─── Navigation ────────────────────────────────────
+const pageTitles={
+  dashboard:{en:'Ward Overview',hi:'वार्ड अवलोकन'},
+  monitoring:{en:'Patient Monitoring',hi:'मरीज़ निगरानी'},
+  heatmap:{en:'Pressure Heatmap',hi:'दबाव हीटमैप'},
+  add:{en:'Add Patient',hi:'मरीज़ जोड़ें'},
+  health:{en:'System Health',hi:'सिस्टम स्वास्थ्य'}
+};
+function showPage(page){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  let pe=document.getElementById('page-'+page);if(pe)pe.classList.add('active');
+  let ne=document.querySelector(`[data-page="${page}"]`);if(ne)ne.classList.add('active');
+  let t=pageTitles[page]||{en:page,hi:page};
+  document.getElementById('pageTitleBar').innerHTML=`<span class="en">${t.en}</span><span class="hi">${t.hi}</span>`;
+  applyLang();
+  if(page==='monitoring')renderMonitoring();
+  if(page==='health')loadSystemStatus();
+}
+
+// ─── Theme / Lang / Mode ───────────────────────────
+function toggleTheme(){
+  currentTheme=currentTheme==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',currentTheme);
+  document.getElementById('themeBtn').textContent=currentTheme==='dark'?'☀️':'🌙';
+}
+const langCycle=['both','en','hi'];let langIdx=0;
+function cycleLang(){langIdx=(langIdx+1)%3;currentLang=langCycle[langIdx];document.getElementById('langLabel').textContent=currentLang==='en'?'EN':currentLang==='hi'?'HI':'हिं/EN';applyLang()}
+function applyLang(){document.documentElement.setAttribute('data-lang',currentLang)}
+function setMode(m){
+  currentMode=m;
+  document.getElementById('modeSimple').className='mode-tab'+(m==='simple'?' active':'');
+  document.getElementById('modeAdvanced').className='mode-tab'+(m==='advanced'?' active':'');
+  if(state.selectedMonitorId)renderMonitoring();
+}
+
+// ─── Clock & Init ──────────────────────────────────
+function updateClock(){
+  let el=document.getElementById('clockDisplay');
+  if(el)el.textContent=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+async function init(){
+  document.documentElement.setAttribute('data-lang','both');
+  updatePreview();
+  await refreshAll();
+  setInterval(updateClock,1000);
+  setInterval(refreshAll,AUTO_REFRESH_MS);
+  updateClock();
+}
+init();
+</script>
 </body>
 </html>
